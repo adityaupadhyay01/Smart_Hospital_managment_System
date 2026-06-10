@@ -1282,7 +1282,7 @@ class Hospital:
             appts = [a for a in self._appointments
                      if a.status == Appointment.STATUS_BOOKED]
         else:
-            print("  ✘ Invalid choice.")
+            print(" Invalid choice.")
             return
         if not appts:
             print("  No appointments found.")
@@ -1290,22 +1290,20 @@ class Hospital:
         for a in appts:
             print(f"  {a}")
 
-    # =========================================================================
-    # MEDICAL RECORDS
-    # =========================================================================
+# MEDICAL RECORD
 
     @log_action
     def add_medical_record(self):
-        print("\n  ─── Create Medical Record ───")
+        print("\n  Create Medical Record")
         pid = input("  Patient ID: ").strip().upper()
         patient = self._recursive_find(self._patients, pid)
         if not patient:
-            print("  ✘ Patient not found.")
+            print("  Patient not found.")
             return
         did = input("  Doctor ID : ").strip().upper()
         doctor = self._recursive_find(self._doctors, did)
         if not doctor:
-            print("  ✘ Doctor not found.")
+            print("  Doctor not found.")
             return
         mr = MedicalRecord(pid, did)
         print("  Enter diagnoses (blank to stop):")
@@ -1330,11 +1328,11 @@ class Hospital:
         if notes:
             mr.add_notes(notes)
         self._records.append(mr)
-        save_record_to_file(mr)               # ← auto-create medical record file
-        print(f"\n  ✔ Medical record created. ID: {mr.id}")
+        save_record_to_file(mr)  
+        print(f"\n  Medical record created. ID: {mr.id}")
 
     def view_medical_records(self):
-        print("\n  ─── View Medical Records ───")
+        print("\n  View Medical Records")
         pid = input("  Patient ID: ").strip().upper()
         records = [r for r in self._records if r.patient_id == pid]
         if not records:
@@ -1348,17 +1346,15 @@ class Hospital:
             for pr in r.prescriptions:
                 print(f"    Rx: {pr['medicine']} | {pr['dosage']} | {pr['days']} days")
 
-    # =========================================================================
     # LABORATORY MANAGEMENT
-    # =========================================================================
 
     @log_action
     def create_lab_report(self):
-        print("\n  ─── Create Lab Report ───")
+        print("\n  Create Lab Report")
         pid = input("  Patient ID  : ").strip().upper()
         patient = self._recursive_find(self._patients, pid)
         if not patient:
-            print("  ✘ Patient not found.")
+            print("  Patient not found.")
             return
         test_name  = input("  Test Name   : ").strip()
         technician = input("  Technician  : ").strip() or "Lab Technician"
@@ -1371,13 +1367,13 @@ class Hospital:
                 cost    = float(input("  Cost (₹)    : "))
                 lr.set_result(result, remarks, cost)
             except ValueError as e:
-                print(f"  ✘ Error: {e}")
+                print(f"  Error: {e}")
         self._lab_reports.append(lr)
-        save_lab_report_to_file(lr)           # ← auto-create lab report file
-        print(f"\n  ✔ Lab report created. ID: {lr.id}")
+        save_lab_report_to_file(lr)  
+        print(f"\n  Lab report created. ID: {lr.id}")
 
     def view_lab_reports(self):
-        print("\n  ─── View Lab Reports ───")
+        print("\n  View Lab Reports")
         pid = input("  Patient ID: ").strip().upper()
         reports = [r for r in self._lab_reports if r.patient_id == pid]
         if not reports:
@@ -1386,13 +1382,11 @@ class Hospital:
         for r in reports:
             print(f"  {r}")
 
-    # =========================================================================
     # PHARMACY MANAGEMENT
-    # =========================================================================
 
     @log_action
     def add_medicine(self):
-        print("\n  ─── Add Medicine ───")
+        print("\n Add Medicine")
         try:
             name     = input("  Name         : ").strip()
             category = input("  Category     : ").strip()
@@ -1402,29 +1396,29 @@ class Hospital:
             mfr      = input("  Manufacturer : ").strip() or "Unknown"
             m = Medicine(name, category, price, stock, expiry, mfr)
             self._medicines.append(m)
-            save_medicine_to_file(m)          # ← auto-create medicine file
-            print(f"\n  ✔ Medicine added. ID: {m.id}")
+            save_medicine_to_file(m)      
+            print(f"\n  Medicine added. ID: {m.id}")
             print(f"  {m}")
         except ValueError as e:
-            print(f"  ✘ Error: {e}")
+            print(f"  Error: {e}")
 
     def update_medicine_stock(self):
-        print("\n  ─── Update Medicine Stock ───")
+        print("\n Update Medicine Stock")
         mid = input("  Medicine ID    : ").strip().upper()
         med = self._recursive_find(self._medicines, mid)
         if not med:
-            print("  ✘ Medicine not found.")
+            print(" Medicine not found.")
             return
         print(f"  Current Stock: {med.stock}")
         try:
             qty = int(input("  Quantity to Add (+) or Remove (-): "))
             med.update_stock(qty)
-            save_medicine_to_file(med)        # ← overwrite medicine file with new stock
+            save_medicine_to_file(med)     
         except ValueError as e:
-            print(f"  ✘ Error: {e}")
+            print(f" Error: {e}")
 
     def check_medicine_availability(self):
-        print("\n  ─── Check Medicine Availability ───")
+        print("\n Check Medicine Availability")
         name = input("  Medicine Name (partial): ").strip().lower()
         # List comprehension
         results = [m for m in self._medicines if name in m.name.lower()]
@@ -1432,19 +1426,19 @@ class Hospital:
             print("  No medicines found.")
             return
         for m in results:
-            status = "✔ Available" if m.is_available() else ("✘ Expired" if m.is_expired() else "✘ Out of Stock")
+            status = "Available" if m.is_available() else ("Expired" if m.is_expired() else "Out of Stock")
             print(f"  {m.name} | Stock={m.stock} | Price=₹{m.price:.2f} | {status}")
 
     def check_expiry(self):
-        print("\n  ─── Medicines Expiry Check ───")
+        print("\n Medicines Expiry Check")
         # Lambda + list comprehension to get expired medicines
         expired = list(filter(lambda m: m.is_expired(), self._medicines))
         if expired:
             print(f"  EXPIRED Medicines ({len(expired)}):")
             for m in expired:
-                print(f"  ⚠  {m.name} | Expiry: {m.expiry_date}")
+                print(f"  {m.name} | Expiry: {m.expiry_date}")
         else:
-            print("  ✔ No expired medicines.")
+            print("  No expired medicines.")
 
         # Near-expiry (within 30 days)
         near = []
@@ -1460,27 +1454,25 @@ class Hospital:
         if near:
             print(f"\n  Near-Expiry (within 30 days) ({len(near)}):")
             for m, d in near:
-                print(f"  ⚠  {m.name} | Expiry: {m.expiry_date} ({d} days left)")
+                print(f"  {m.name} | Expiry: {m.expiry_date} ({d} days left)")
 
     def list_all_medicines(self):
         if not self._medicines:
             print("  No medicines in pharmacy.")
             return
-        print(f"\n  ─── All Medicines ({len(self._medicines)}) ───")
+        print(f"\n  All Medicines ({len(self._medicines)})")
         for m in self._medicines:
             print(f"  {m}")
 
-    # =========================================================================
-    # BILLING MANAGEMENT
-    # =========================================================================
+    #BILLING MANAGEMENT
 
     @log_action
     def create_bill(self):
-        print("\n  ─── Create Bill ───")
+        print("\n  Create Bill")
         pid = input("  Patient ID: ").strip().upper()
         patient = self._recursive_find(self._patients, pid)
         if not patient:
-            print("  ✘ Patient not found.")
+            print(" Patient not found.")
             return
         bill = Bill(pid)
 
@@ -1497,7 +1489,7 @@ class Hospital:
                     amt = float(input("  Manual consultation amount: ₹"))
                     bill.add_consultation(amt)
             except ValueError as e:
-                print(f"  ✘ Error: {e}")
+                print(f" Error: {e}")
 
         # Medicine charges
         add_med = input("  Add medicine charges? (y/n): ").strip().lower()
@@ -1514,7 +1506,7 @@ class Hospital:
                 bill.add_medicine_charge(total_cost, med.name)
                 print(f"  ₹{total_cost:.2f} added for {med.name} x{qty}.")
             except ValueError as e:
-                print(f"  ✘ Error: {e}")
+                print(f" Error: {e}")
             add_med = input("  Add another medicine? (y/n): ").strip().lower()
 
         # Lab charges
@@ -1529,7 +1521,7 @@ class Hospital:
                 else:
                     print("  Lab report not found.")
             except ValueError as e:
-                print(f"  ✘ Error: {e}")
+                print(f" Error: {e}")
             add_lab = input("  Add another lab charge? (y/n): ").strip().lower()
 
         # Other charges
@@ -1540,7 +1532,7 @@ class Hospital:
                 amt  = float(input("  Amount (₹) : "))
                 bill.add_other_charge(amt, desc)
             except ValueError as e:
-                print(f"  ✘ Error: {e}")
+                print(f" Error: {e}")
 
         # Discount
         disc_s = input("  Discount (₹, 0 for none): ").strip()
@@ -1552,7 +1544,7 @@ class Hospital:
 
         self._bills.append(bill)
         save_bill_to_file(bill, patient.name) # ← auto-create bill file
-        print(f"\n  ✔ Bill created. ID: {bill.id}")
+        print(f"\n Bill created. ID: {bill.id}")
         print(f"  Total: ₹{bill.calculate_total():.2f}")
 
         pay_now = input("  Mark as paid now? (y/n): ").strip().lower()
@@ -1561,22 +1553,22 @@ class Hospital:
             save_bill_to_file(bill, patient.name)  # ← overwrite with PAID status
 
     def view_bill(self):
-        print("\n  ─── View Bill ───")
+        print("\n  View Bill")
         bid = input("  Bill ID: ").strip().upper()
         bill = self._recursive_find(self._bills, bid)
         if not bill:
-            print("  ✘ Bill not found.")
+            print("  Bill not found.")
             return
         patient = self._recursive_find(self._patients, bill.patient_id)
         pname   = patient.name if patient else "Unknown"
         print(bill.generate_receipt(pname))
 
     def generate_receipt(self):
-        print("\n  ─── Generate Receipt ───")
+        print("\n Generate Receipt")
         pid = input("  Patient ID: ").strip().upper()
         patient = self._recursive_find(self._patients, pid)
         if not patient:
-            print("  ✘ Patient not found.")
+            print(" Patient not found.")
             return
         bills = [b for b in self._bills if b.patient_id == pid]
         if not bills:
@@ -1590,14 +1582,12 @@ class Hospital:
             if 0 <= sc < len(bills):
                 print(bills[sc].generate_receipt(patient.name))
             else:
-                print("  ✘ Invalid selection.")
+                print("  Invalid selection.")
         except ValueError:
-            print("  ✘ Invalid input.")
+            print(" Invalid input.")
 
-    # =========================================================================
     # GENERATOR: Hospital Summary Report
-    # =========================================================================
-
+    
     def _report_generator(self):
         """
         Generator function: yields one section of the hospital report at a time.
@@ -1641,12 +1631,10 @@ class Hospital:
         for line in self._report_generator():
             print(line)
 
-    # =========================================================================
     # SAVE & LOAD ALL DATA
-    # =========================================================================
-
+    
     def save_all_data(self):
-        print("\n  ─── Saving All Data ───")
+        print("\n  Saving All Data")
         save_data(PATIENTS_FILE,     [p.to_dict() for p in self._patients])
         save_data(DOCTORS_FILE,      [d.to_dict() for d in self._doctors])
         save_data(APPOINTMENTS_FILE, [a.to_dict() for a in self._appointments])
@@ -1659,12 +1647,7 @@ class Hospital:
         print("  ✔ All data saved.")
 
     def load_all_data(self):
-        print("\n  ─── Loading All Data ───")
-        # FIX: use clear() + extend() instead of reassignment ( self._x = [...] ).
-        # Reassignment creates a brand-new list object; any nurse (or other record)
-        # appended to the old list after the last save would be silently discarded
-        # the next time load_all_data() was called — making "List All Nurses" show
-        # nothing immediately after "Add Nurse" when the user triggers a reload.
+        print("\n Loading All Data")
         self._patients.clear()
         self._patients.extend(Patient.from_dict(d) for d in load_data(PATIENTS_FILE))
 
@@ -1692,13 +1675,10 @@ class Hospital:
         self._lab_reports.extend(
             LabReport.from_dict(d) for d in load_data("lab_reports.json"))
 
-        print(f"  ✔ Loaded: {len(self._patients)} patients, {len(self._doctors)} doctors, "
+        print(f" Loaded: {len(self._patients)} patients, {len(self._doctors)} doctors, "
               f"{len(self._nurses)} nurses, {len(self._appointments)} appointments.")
 
-
-# =============================================================================
 # MENU DRIVER
-# =============================================================================
 
 def display_main_menu():
     print("\n" + "=" * 55)
@@ -1718,10 +1698,9 @@ def display_main_menu():
     print("  0.  Exit")
     print("=" * 55)
 
-
 def patient_menu(hospital: Hospital):
     while True:
-        print("\n  ── Patient Management ──")
+        print("\n Patient Management")
         print("  1. Register Patient")
         print("  2. Update Patient")
         print("  3. Search Patient")
@@ -1735,12 +1714,12 @@ def patient_menu(hospital: Hospital):
         elif ch == "4": hospital.view_patient_history()
         elif ch == "5": hospital.list_all_patients()
         elif ch == "0": break
-        else: print("  ✘ Invalid choice.")
+        else: print("  Invalid choice.")
 
 
 def doctor_menu(hospital: Hospital):
     while True:
-        print("\n  ── Doctor Management ──")
+        print("\nDoctor Management")
         print("  1. Add Doctor")
         print("  2. Update Doctor")
         print("  3. Manage Available Slots")
@@ -1753,7 +1732,6 @@ def doctor_menu(hospital: Hospital):
         elif ch == "4": hospital.list_all_doctors()
         elif ch == "0": break
         else: print("  ✘ Invalid choice.")
-
 
 def nurse_menu(hospital: Hospital):
     while True:
@@ -1769,12 +1747,11 @@ def nurse_menu(hospital: Hospital):
         elif ch == "3": hospital.manage_nurse_shift()
         elif ch == "4": hospital.list_all_nurses()
         elif ch == "0": break
-        else: print("  ✘ Invalid choice.")
-
+        else: print("  Invalid choice.")
 
 def appointment_menu(hospital: Hospital):
     while True:
-        print("\n  ── Appointment Management ──")
+        print("\n Appointment Management")
         print("  1. Book Appointment")
         print("  2. Cancel Appointment")
         print("  3. Reschedule Appointment")
@@ -1786,12 +1763,11 @@ def appointment_menu(hospital: Hospital):
         elif ch == "3": hospital.reschedule_appointment()
         elif ch == "4": hospital.view_appointments()
         elif ch == "0": break
-        else: print("  ✘ Invalid choice.")
-
+        else: print(" Invalid choice.")
 
 def medical_records_menu(hospital: Hospital):
     while True:
-        print("\n  ── Medical Records ──")
+        print("\n Medical Records")
         print("  1. Add Diagnosis & Prescription")
         print("  2. View Records")
         print("  0. Back")
@@ -1799,12 +1775,11 @@ def medical_records_menu(hospital: Hospital):
         if   ch == "1": hospital.add_medical_record()
         elif ch == "2": hospital.view_medical_records()
         elif ch == "0": break
-        else: print("  ✘ Invalid choice.")
-
+        else: print(" Invalid choice.")
 
 def lab_menu(hospital: Hospital):
     while True:
-        print("\n  ── Laboratory Management ──")
+        print("\n  Laboratory Managemen")
         print("  1. Create Lab Report")
         print("  2. View Lab Reports")
         print("  0. Back")
@@ -1812,12 +1787,11 @@ def lab_menu(hospital: Hospital):
         if   ch == "1": hospital.create_lab_report()
         elif ch == "2": hospital.view_lab_reports()
         elif ch == "0": break
-        else: print("  ✘ Invalid choice.")
-
+        else: print("  Invalid choice.")
 
 def pharmacy_menu(hospital: Hospital):
     while True:
-        print("\n  ── Pharmacy Management ──")
+        print("\nPharmacy Management")
         print("  1. Add Medicine")
         print("  2. Update Stock")
         print("  3. Check Availability")
@@ -1831,12 +1805,11 @@ def pharmacy_menu(hospital: Hospital):
         elif ch == "4": hospital.check_expiry()
         elif ch == "5": hospital.list_all_medicines()
         elif ch == "0": break
-        else: print("  ✘ Invalid choice.")
-
+        else: print("  Invalid choice.")
 
 def billing_menu(hospital: Hospital):
     while True:
-        print("\n  ── Billing Management ──")
+        print("\n Billing Management")
         print("  1. Create Bill")
         print("  2. View Bill by Bill ID")
         print("  3. Generate Receipt for Patient")
@@ -1846,12 +1819,9 @@ def billing_menu(hospital: Hospital):
         elif ch == "2": hospital.view_bill()
         elif ch == "3": hospital.generate_receipt()
         elif ch == "0": break
-        else: print("  ✘ Invalid choice.")
+        else: print(" Invalid choice.")
 
-
-# =============================================================================
-# ENTRY POINT
-# =============================================================================
+#ENTRY POINT
 
 def main():
     hospital = Hospital("Smart City Hospital")
@@ -1884,11 +1854,11 @@ def main():
                 print("  Goodbye!\n")
                 break
             else:
-                print("  ✘ Invalid choice. Please enter 0-11.")
+                print(" Invalid choice. Please enter 0-11.")
         except KeyboardInterrupt:
             print("\n\n  Interrupted. Returning to main menu.")
         except Exception as e:
-            print(f"\n  ✘ Unexpected error: {e}")
+            print(f"\n  Unexpected error: {e}")
 
 
 if __name__ == "__main__":
