@@ -20,9 +20,9 @@ def save_data(filename: str, data: list) -> None:
     try:
         with open(filename, "w") as f:
             json.dump(data, f, indent=4)
-        print(f"  [✔] Data saved to {filename}")
+        print(f"  Data saved to {filename}")
     except IOError as e:
-        print(f"  [✘] Failed to save {filename}: {e}")
+        print(f"  Failed to save {filename}: {e}")
 
 def load_data(filename: str) -> list:
     """Load a list of dictionaries from a JSON file. Returns [] if not found."""
@@ -1543,14 +1543,14 @@ class Hospital:
             disc = 0.0
 
         self._bills.append(bill)
-        save_bill_to_file(bill, patient.name) # ← auto-create bill file
+        save_bill_to_file(bill, patient.name)
         print(f"\n Bill created. ID: {bill.id}")
         print(f"  Total: ₹{bill.calculate_total():.2f}")
 
         pay_now = input("  Mark as paid now? (y/n): ").strip().lower()
         if pay_now == "y":
             bill.mark_paid()
-            save_bill_to_file(bill, patient.name)  # ← overwrite with PAID status
+            save_bill_to_file(bill, patient.name) 
 
     def view_bill(self):
         print("\n  View Bill")
