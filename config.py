@@ -1,0 +1,16 @@
+# =============================================================================
+# config.py — Global constants for Smart Hospital Management System
+# =============================================================================
+
+# JSON persistence file paths
+PATIENTS_FILE     = "patients.json"
+DOCTORS_FILE      = "doctors.json"
+APPOINTMENTS_FILE = "appointments.json"
+MEDICINES_FILE    = "medicines.json"
+RECORDS_FILE      = "records.json"
+BILLS_FILE        = "bills.json"
+NURSES_FILE       = "nurses.json"
+LAB_REPORTS_FILE  = "lab_reports.json"
+
+# Root folder for individual human-readable .txt record files
+DATA_ROOT = "hospital_data"
