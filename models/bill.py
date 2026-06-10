@@ -1,10 +1,7 @@
-# =============================================================================
 # models/bill.py — Bill class
-# =============================================================================
 
 import uuid
 from datetime import datetime
-
 
 class Bill:
     """Represents a patient bill with itemized charges."""

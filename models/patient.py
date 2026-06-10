@@ -1,10 +1,7 @@
-# =============================================================================
 # models/patient.py — Patient class (inherits Person)
-# =============================================================================
 
 from datetime import datetime
 from models.person import Person
-
 
 class Patient(Person):
     """Represents a hospital patient. Inherits from Person."""

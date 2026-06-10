@@ -1,10 +1,7 @@
-# =============================================================================
 # models/medical_record.py — MedicalRecord class
-# =============================================================================
 
 import uuid
 from datetime import datetime
-
 
 class MedicalRecord:
     """Stores diagnosis and prescription data for a patient visit."""

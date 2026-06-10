@@ -1,9 +1,6 @@
-# =============================================================================
 # models/doctor.py — Doctor class (inherits Person)
-# =============================================================================
 
 from models.person import Person
-
 
 class Doctor(Person):
     """Represents a hospital doctor. Inherits from Person."""

@@ -1,10 +1,7 @@
-# =============================================================================
-# models/person.py — Abstract base class: Person
-# =============================================================================
+#models/person.py — Abstract base class: Person
 
 import uuid
 from abc import ABC, abstractmethod
-
 
 class Person(ABC):
     """
@@ -22,7 +19,7 @@ class Person(ABC):
         self._phone   = phone
         self._address = address
 
-    # --- Getters ---
+    # Getters
     @property
     def id(self):       return self._id
     @property
@@ -36,7 +33,7 @@ class Person(ABC):
     @property
     def address(self):  return self._address
 
-    # --- Setters ---
+    # Setters
     @name.setter
     def name(self, value):
         if not value.strip():
@@ -57,12 +54,12 @@ class Person(ABC):
     def address(self, value):
         self._address = value
 
-    # --- Abstract Method (Abstraction) ---
+    # Abstract Method (Abstraction)
     @abstractmethod
     def get_role(self) -> str:
         """Every person must declare their role."""
 
-    # --- Magic Method ---
+    # Magic Method
     def __str__(self):
         return (f"[{self.get_role()}] ID={self._id} | Name={self._name} | "
                 f"Age={self._age} | Gender={self._gender} | Phone={self._phone}")
@@ -82,4 +79,4 @@ class Person(ABC):
     @classmethod
     def from_dict_base(cls, data: dict):
         """Restore base fields from dictionary (used by subclasses)."""
-        return data  # subclasses handle full restoration
+        return data

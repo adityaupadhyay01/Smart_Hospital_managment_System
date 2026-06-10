@@ -1,10 +1,7 @@
-# =============================================================================
 # models/lab_report.py — LabReport class
-# =============================================================================
 
 import uuid
 from datetime import datetime
-
 
 class LabReport:
     """Represents a laboratory test report for a patient."""

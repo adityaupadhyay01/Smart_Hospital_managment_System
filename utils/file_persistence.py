@@ -2,13 +2,11 @@ import os
 from datetime import datetime
 from config import DATA_ROOT
 
-
 def _ensure_dir(subfolder: str) -> str:
     """Create DATA_ROOT/<subfolder> if it does not exist. Returns the path."""
     path = os.path.join(DATA_ROOT, subfolder)
     os.makedirs(path, exist_ok=True)
     return path
-
 
 def _write_file(filepath: str, content: str) -> None:
     """Write content to filepath, overwriting any previous version."""
@@ -19,10 +17,8 @@ def _write_file(filepath: str, content: str) -> None:
     except IOError as e:
         print(f"  [FILE ✘] Could not write {filepath}: {e}")
 
-
 def _sep(char: str = "=", width: int = 45) -> str:
     return char * width
-
 
 def save_patient_to_file(patient) -> None:
     """Create/overwrite  hospital_data/patients/patient_<id>.txt"""
@@ -48,7 +44,6 @@ def save_patient_to_file(patient) -> None:
         f"{_sep()}\n"
     )
     _write_file(filepath, content)
-
 
 def save_doctor_to_file(doctor) -> None:
     """Create/overwrite  hospital_data/doctors/doctor_<id>.txt"""
@@ -76,7 +71,6 @@ def save_doctor_to_file(doctor) -> None:
     )
     _write_file(filepath, content)
 
-
 def save_nurse_to_file(nurse) -> None:
     """Create/overwrite  hospital_data/nurses/nurse_<id>.txt"""
     folder   = _ensure_dir("nurses")
@@ -99,7 +93,6 @@ def save_nurse_to_file(nurse) -> None:
     )
     _write_file(filepath, content)
 
-
 def save_appointment_to_file(appt) -> None:
     """Create/overwrite  hospital_data/appointments/appointment_<id>.txt"""
     folder   = _ensure_dir("appointments")
@@ -119,7 +112,6 @@ def save_appointment_to_file(appt) -> None:
         f"{_sep()}\n"
     )
     _write_file(filepath, content)
-
 
 def save_record_to_file(record) -> None:
     """Create/overwrite  hospital_data/records/record_<id>.txt"""
@@ -150,7 +142,6 @@ def save_record_to_file(record) -> None:
     )
     _write_file(filepath, content)
 
-
 def save_medicine_to_file(medicine) -> None:
     """Create/overwrite  hospital_data/medicines/medicine_<id>.txt"""
     folder   = _ensure_dir("medicines")
@@ -174,7 +165,6 @@ def save_medicine_to_file(medicine) -> None:
         f"{_sep()}\n"
     )
     _write_file(filepath, content)
-
 
 def save_bill_to_file(bill, patient_name: str = "") -> None:
     """Create/overwrite  hospital_data/bills/bill_<id>.txt"""
@@ -206,7 +196,6 @@ def save_bill_to_file(bill, patient_name: str = "") -> None:
         f"{_sep()}\n"
     )
     _write_file(filepath, content)
-
 
 def save_lab_report_to_file(lab_report) -> None:
     """Create/overwrite  hospital_data/lab_reports/labreport_<id>.txt"""

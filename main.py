@@ -1,25 +1,3 @@
-#Project structure:
-#   hospital_system/
-#   ├── main.py                   ← YOU ARE HERE
-#   ├── config.py                 ← JSON file paths & data root constant
-#   ├── utils/
-#   │   ├── file_io.py            ← save_data() / load_data()
-#   │   ├── file_persistence.py   ← save_*_to_file() helpers
-#   │   └── decorators.py         ← @log_action decorator
-#   ├── models/
-#   │   ├── person.py             ← Abstract Person (ABC)
-#   │   ├── patient.py
-#   │   ├── doctor.py
-#   │   ├── nurse.py
-#   │   ├── appointment.py
-#   │   ├── medical_record.py
-#   │   ├── medicine.py
-#   │   ├── lab_report.py
-#   │   └── bill.py
-#   ├── hospital~/
-#   │   └── hospital.py           ← Hospital class (all management logic)
-#   └── menus/
-#       └── menus.py              ← All menu / sub-menu functions
 from hospital.hospital import Hospital
 from menus.menus import (
     display_main_menu,

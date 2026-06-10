@@ -1,6 +1,4 @@
-# =============================================================================
 # config.py — Global constants for Smart Hospital Management System
-# =============================================================================
 
 # JSON persistence file paths
 PATIENTS_FILE     = "patients.json"

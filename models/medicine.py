@@ -1,10 +1,7 @@
-# =============================================================================
 # models/medicine.py — Medicine class
-# =============================================================================
 
 import uuid
 from datetime import datetime, date
-
 
 class Medicine:
     """Represents a medicine in the hospital pharmacy."""
@@ -16,7 +13,7 @@ class Medicine:
         self._category     = category
         self._price        = float(price)
         self._stock        = int(stock)
-        self._expiry_date  = expiry_date    # "YYYY-MM-DD"
+        self._expiry_date  = expiry_date   
         self._manufacturer = manufacturer
 
     @property

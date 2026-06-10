@@ -1,10 +1,7 @@
-# =============================================================================
 # utils/file_io.py — JSON save & load helpers
-# =============================================================================
 
 import json
 import os
-
 
 def save_data(filename: str, data: list) -> None:
     """Save a list of dictionaries to a JSON file."""
@@ -14,7 +11,6 @@ def save_data(filename: str, data: list) -> None:
         print(f"  [✔] Data saved to {filename}")
     except IOError as e:
         print(f"  [✘] Failed to save {filename}: {e}")
-
 
 def load_data(filename: str) -> list:
     """Load a list of dictionaries from a JSON file. Returns [] if not found."""

@@ -1,9 +1,6 @@
-# =============================================================================
-# menus/menus.py — All menu functions for the Hospital Management System
-# =============================================================================
+# All menu functions for the Hospital Management System
 
 from hospital.hospital import Hospital
-
 
 def display_main_menu():
     print("\n" + "=" * 55)
@@ -23,7 +20,6 @@ def display_main_menu():
     print("  0.  Exit")
     print("=" * 55)
 
-
 def patient_menu(hospital: Hospital):
     while True:
         print("\n  ── Patient Management ──")
@@ -40,12 +36,11 @@ def patient_menu(hospital: Hospital):
         elif ch == "4": hospital.view_patient_history()
         elif ch == "5": hospital.list_all_patients()
         elif ch == "0": break
-        else: print("  ✘ Invalid choice.")
-
+        else: print(" Invalid choice.")
 
 def doctor_menu(hospital: Hospital):
     while True:
-        print("\n  ── Doctor Management ──")
+        print("\n Doctor Management")
         print("  1. Add Doctor")
         print("  2. Update Doctor")
         print("  3. Manage Available Slots")
@@ -57,12 +52,11 @@ def doctor_menu(hospital: Hospital):
         elif ch == "3": hospital.manage_doctor_slots()
         elif ch == "4": hospital.list_all_doctors()
         elif ch == "0": break
-        else: print("  ✘ Invalid choice.")
-
+        else: print("  Invalid choice.")
 
 def nurse_menu(hospital: Hospital):
     while True:
-        print("\n  ── Nurse Management ──")
+        print("\n  Nurse Management")
         print("  1. Add Nurse")
         print("  2. Assign Department")
         print("  3. Manage Shift")
@@ -74,12 +68,11 @@ def nurse_menu(hospital: Hospital):
         elif ch == "3": hospital.manage_nurse_shift()
         elif ch == "4": hospital.list_all_nurses()
         elif ch == "0": break
-        else: print("  ✘ Invalid choice.")
-
+        else: print("  Invalid choice.")
 
 def appointment_menu(hospital: Hospital):
     while True:
-        print("\n  ── Appointment Management ──")
+        print("\n  Appointment Management")
         print("  1. Book Appointment")
         print("  2. Cancel Appointment")
         print("  3. Reschedule Appointment")
@@ -91,12 +84,11 @@ def appointment_menu(hospital: Hospital):
         elif ch == "3": hospital.reschedule_appointment()
         elif ch == "4": hospital.view_appointments()
         elif ch == "0": break
-        else: print("  ✘ Invalid choice.")
-
+        else: print("  Invalid choice.")
 
 def medical_records_menu(hospital: Hospital):
     while True:
-        print("\n  ── Medical Records ──")
+        print("\n Medical Records")
         print("  1. Add Diagnosis & Prescription")
         print("  2. View Records")
         print("  0. Back")
@@ -104,12 +96,11 @@ def medical_records_menu(hospital: Hospital):
         if   ch == "1": hospital.add_medical_record()
         elif ch == "2": hospital.view_medical_records()
         elif ch == "0": break
-        else: print("  ✘ Invalid choice.")
-
+        else: print("  Invalid choice.")
 
 def lab_menu(hospital: Hospital):
     while True:
-        print("\n  ── Laboratory Management ──")
+        print("\n  Laboratory Management")
         print("  1. Create Lab Report")
         print("  2. View Lab Reports")
         print("  0. Back")
@@ -117,12 +108,11 @@ def lab_menu(hospital: Hospital):
         if   ch == "1": hospital.create_lab_report()
         elif ch == "2": hospital.view_lab_reports()
         elif ch == "0": break
-        else: print("  ✘ Invalid choice.")
-
+        else: print("  Invalid choice.")
 
 def pharmacy_menu(hospital: Hospital):
     while True:
-        print("\n  ── Pharmacy Management ──")
+        print("\n Pharmacy Management")
         print("  1. Add Medicine")
         print("  2. Update Stock")
         print("  3. Check Availability")
@@ -136,12 +126,11 @@ def pharmacy_menu(hospital: Hospital):
         elif ch == "4": hospital.check_expiry()
         elif ch == "5": hospital.list_all_medicines()
         elif ch == "0": break
-        else: print("  ✘ Invalid choice.")
-
+        else: print("  Invalid choice.")
 
 def billing_menu(hospital: Hospital):
     while True:
-        print("\n  ── Billing Management ──")
+        print("\n Billing Management")
         print("  1. Create Bill")
         print("  2. View Bill by Bill ID")
         print("  3. Generate Receipt for Patient")
@@ -151,4 +140,4 @@ def billing_menu(hospital: Hospital):
         elif ch == "2": hospital.view_bill()
         elif ch == "3": hospital.generate_receipt()
         elif ch == "0": break
-        else: print("  ✘ Invalid choice.")
+        else: print("  Invalid choice.")

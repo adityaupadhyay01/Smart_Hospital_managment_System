@@ -1,10 +1,7 @@
-# =============================================================================
 # utils/decorators.py — Reusable decorators
-# =============================================================================
 
 import functools
 from datetime import datetime
-
 
 def log_action(func):
     """Decorator that logs every action with a timestamp."""
