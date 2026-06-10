@@ -1,11 +1,3 @@
-# =============================================================================
-# SMART HOSPITAL MANAGEMENT SYSTEM
-# A complete OOP-based Python project demonstrating:
-# Classes, Inheritance, Polymorphism, Abstraction, Encapsulation,
-# Composition, Static/Class Methods, Magic Methods, Decorators,
-# Generators, Lambda, List Comprehension, Recursion, File Handling
-# =============================================================================
-
 import json
 import os
 import uuid
@@ -13,10 +5,7 @@ import functools
 from abc import ABC, abstractmethod
 from datetime import datetime, date
 
-
-# =============================================================================
 # JSON FILE PATHS
-# =============================================================================
 PATIENTS_FILE    = "patients.json"
 DOCTORS_FILE     = "doctors.json"
 APPOINTMENTS_FILE = "appointments.json"
@@ -24,10 +13,7 @@ MEDICINES_FILE   = "medicines.json"
 RECORDS_FILE     = "records.json"
 BILLS_FILE       = "bills.json"
 
-
-# =============================================================================
-# UTILITY: FILE HANDLING
-# =============================================================================
+#UTILITY: FILE HANDLING
 
 def save_data(filename: str, data: list) -> None:
     """Save a list of dictionaries to a JSON file."""
@@ -37,7 +23,6 @@ def save_data(filename: str, data: list) -> None:
         print(f"  [✔] Data saved to {filename}")
     except IOError as e:
         print(f"  [✘] Failed to save {filename}: {e}")
-
 
 def load_data(filename: str) -> list:
     """Load a list of dictionaries from a JSON file. Returns [] if not found."""
@@ -50,13 +35,7 @@ def load_data(filename: str) -> list:
         print(f"  [✘] Failed to load {filename}: {e}")
         return []
 
-
-# =============================================================================
-# FILE-PERSISTENCE HELPERS  (hospital_data/ folder tree)
-# Each helper creates the required sub-folder and writes a human-readable .txt
-# file for every entity.  Called automatically on create/update operations.
-# =============================================================================
-
+# Hospital Data and Folder Tree
 # Root folder for all individual record files
 _DATA_ROOT = "hospital_data"
 
@@ -65,7 +44,6 @@ def _ensure_dir(subfolder: str) -> str:
     path = os.path.join(_DATA_ROOT, subfolder)
     os.makedirs(path, exist_ok=True)
     return path
-
 
 def _write_file(filepath: str, content: str) -> None:
     """Write *content* to *filepath*, overwriting any previous version."""
@@ -76,10 +54,8 @@ def _write_file(filepath: str, content: str) -> None:
     except IOError as e:
         print(f"  [FILE ✘] Could not write {filepath}: {e}")
 
-
 def _sep(char: str = "=", width: int = 45) -> str:
     return char * width
-
 
 def save_patient_to_file(patient) -> None:
     """Create/overwrite  hospital_data/patients/patient_<id>.txt"""
@@ -105,7 +81,6 @@ def save_patient_to_file(patient) -> None:
         f"{_sep()}\n"
     )
     _write_file(filepath, content)
-
 
 def save_doctor_to_file(doctor) -> None:
     """Create/overwrite  hospital_data/doctors/doctor_<id>.txt"""
@@ -133,7 +108,6 @@ def save_doctor_to_file(doctor) -> None:
     )
     _write_file(filepath, content)
 
-
 def save_nurse_to_file(nurse) -> None:
     """Create/overwrite  hospital_data/nurses/nurse_<id>.txt"""
     folder   = _ensure_dir("nurses")
@@ -156,7 +130,6 @@ def save_nurse_to_file(nurse) -> None:
     )
     _write_file(filepath, content)
 
-
 def save_appointment_to_file(appt) -> None:
     """Create/overwrite  hospital_data/appointments/appointment_<id>.txt"""
     folder   = _ensure_dir("appointments")
@@ -176,7 +149,6 @@ def save_appointment_to_file(appt) -> None:
         f"{_sep()}\n"
     )
     _write_file(filepath, content)
-
 
 def save_record_to_file(record) -> None:
     """Create/overwrite  hospital_data/records/record_<id>.txt"""
@@ -207,7 +179,6 @@ def save_record_to_file(record) -> None:
     )
     _write_file(filepath, content)
 
-
 def save_medicine_to_file(medicine) -> None:
     """Create/overwrite  hospital_data/medicines/medicine_<id>.txt"""
     folder   = _ensure_dir("medicines")
@@ -231,7 +202,6 @@ def save_medicine_to_file(medicine) -> None:
         f"{_sep()}\n"
     )
     _write_file(filepath, content)
-
 
 def save_bill_to_file(bill, patient_name: str = "") -> None:
     """Create/overwrite  hospital_data/bills/bill_<id>.txt"""
@@ -264,7 +234,6 @@ def save_bill_to_file(bill, patient_name: str = "") -> None:
     )
     _write_file(filepath, content)
 
-
 def save_lab_report_to_file(lab_report) -> None:
     """Create/overwrite  hospital_data/lab_reports/labreport_<id>.txt"""
     folder   = _ensure_dir("lab_reports")
@@ -289,10 +258,7 @@ def save_lab_report_to_file(lab_report) -> None:
     )
     _write_file(filepath, content)
 
-
-# =============================================================================
 # DECORATOR: Logging
-# =============================================================================
 
 def log_action(func):
     """Decorator that logs every action with a timestamp."""
@@ -305,10 +271,7 @@ def log_action(func):
         return result
     return wrapper
 
-
-# =============================================================================
 # ABSTRACT BASE CLASS: Person
-# =============================================================================
 
 class Person(ABC):
     """
@@ -325,7 +288,7 @@ class Person(ABC):
         self._phone   = phone
         self._address = address
 
-    # --- Getters ---
+    # Getters
     @property
     def id(self):       return self._id
     @property
@@ -339,7 +302,7 @@ class Person(ABC):
     @property
     def address(self):  return self._address
 
-    # --- Setters ---
+    # Setters
     @name.setter
     def name(self, value):
         if not value.strip():
@@ -360,12 +323,12 @@ class Person(ABC):
     def address(self, value):
         self._address = value
 
-    # --- Abstract Method (Abstraction) ---
+    # Abstract Method (Abstraction)
     @abstractmethod
     def get_role(self) -> str:
         """Every person must declare their role."""
 
-    # --- Magic Method ---
+    # Magic Method
     def __str__(self):
         return (f"[{self.get_role()}] ID={self._id} | Name={self._name} | "
                 f"Age={self._age} | Gender={self._gender} | Phone={self._phone}")
@@ -385,12 +348,9 @@ class Person(ABC):
     @classmethod
     def from_dict_base(cls, data: dict):
         """Restore base fields from dictionary (used by subclasses)."""
-        return data  # subclasses handle full restoration
+        return data  
 
-
-# =============================================================================
 # DERIVED CLASS: Patient
-# =============================================================================
 
 class Patient(Person):
     """Represents a hospital patient. Inherits from Person."""
@@ -398,7 +358,7 @@ class Patient(Person):
     def __init__(self, name, age, gender, phone, address, blood_group="Unknown"):
         super().__init__(name, age, gender, phone, address)
         self._blood_group  = blood_group
-        self._medical_history: list = []   # list of condition strings
+        self._medical_history: list = []   
         self._registration_date = datetime.now().strftime("%Y-%m-%d")
 
     # Polymorphism: overrides abstract method
@@ -440,10 +400,7 @@ class Patient(Person):
         p._registration_date = data.get("registration_date", "")
         return p
 
-
-# =============================================================================
 # DERIVED CLASS: Doctor
-# =============================================================================
 
 class Doctor(Person):
     """Represents a hospital doctor. Inherits from Person."""
@@ -453,7 +410,7 @@ class Doctor(Person):
         super().__init__(name, age, gender, phone, address)
         self._specialization   = specialization
         self._consultation_fee = float(consultation_fee)
-        self._available_slots  = []   # list of datetime strings
+        self._available_slots  = []  
         self._department       = specialization
 
     def get_role(self) -> str:
@@ -516,10 +473,7 @@ class Doctor(Person):
         doc._department      = data.get("department", doc._specialization)
         return doc
 
-
-# =============================================================================
 # DERIVED CLASS: Nurse
-# =============================================================================
 
 class Nurse(Person):
     """Represents a hospital nurse. Inherits from Person."""
@@ -565,10 +519,7 @@ class Nurse(Person):
         n._id = data["id"]
         return n
 
-
-# =============================================================================
 # CLASS: Appointment
-# =============================================================================
 
 class Appointment:
     """Represents a scheduled appointment between a patient and a doctor."""
@@ -644,10 +595,7 @@ class Appointment:
         a._created_at = data.get("created_at", "")
         return a
 
-
-# =============================================================================
 # CLASS: MedicalRecord
-# =============================================================================
 
 class MedicalRecord:
     """Stores diagnosis and prescription data for a patient visit."""
@@ -657,8 +605,8 @@ class MedicalRecord:
         self._patient_id   = patient_id
         self._doctor_id    = doctor_id
         self._date         = datetime.now().strftime("%Y-%m-%d")
-        self._diagnoses    = []   # list of strings
-        self._prescriptions = []  # list of {"medicine": str, "dosage": str, "days": int}
+        self._diagnoses    = []   
+        self._prescriptions = []  
         self._notes        = ""
 
     @property
@@ -717,10 +665,7 @@ class MedicalRecord:
         mr._notes         = data.get("notes", "")
         return mr
 
-
-# =============================================================================
 # CLASS: Medicine
-# =============================================================================
 
 class Medicine:
     """Represents a medicine in the hospital pharmacy."""
@@ -792,10 +737,7 @@ class Medicine:
         m._id = data["id"]
         return m
 
-
-# =============================================================================
-# CLASS: LabReport
-# =============================================================================
+#CLASS: LabReport
 
 class LabReport:
     """Represents a laboratory test report for a patient."""
@@ -864,10 +806,7 @@ class LabReport:
         lr._status   = data.get("status", "Pending")
         return lr
 
-
-# =============================================================================
-# CLASS: Bill
-# =============================================================================
+#CLASS: Bill
 
 class Bill:
     """Represents a patient bill with itemized charges."""
@@ -882,7 +821,7 @@ class Bill:
         self._discount            = 0.0
         self._date                = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         self._is_paid             = False
-        self._items               = []  # list of {"description": str, "amount": float}
+        self._items               = [] 
 
     @property
     def id(self):           return self._id
@@ -943,7 +882,7 @@ class Bill:
             f"  {'Discount':<35} ₹{self._discount:>8.2f}",
             sep,
             f"  {'TOTAL AMOUNT':<35} ₹{self.calculate_total():>8.2f}",
-            f"  Status: {'✔ PAID' if self._is_paid else '✘ UNPAID'}",
+            f"  Status: {'PAID' if self._is_paid else '✘ UNPAID'}",
             sep,
             "     Thank you for choosing Smart Hospital!",
             sep,
@@ -982,10 +921,7 @@ class Bill:
         b._items                 = data.get("items", [])
         return b
 
-
-# =============================================================================
-# CLASS: Hospital  (Composition — owns lists of all entities)
-# =============================================================================
+#CLASS: Hospital  (Composition — owns lists of all entities)
 
 class Hospital:
     """
@@ -1007,9 +943,7 @@ class Hospital:
         self._medicines:    list[Medicine]      = []
         self._bills:        list[Bill]          = []
 
-    # -------------------------------------------------------------------------
     # HELPER: find by id using recursion
-    # -------------------------------------------------------------------------
 
     def _recursive_find(self, collection: list, target_id: str, index: int = 0):
         """
@@ -1022,13 +956,10 @@ class Hospital:
             return collection[index]
         return self._recursive_find(collection, target_id, index + 1)
 
-    # =========================================================================
     # PATIENT MANAGEMENT
-    # =========================================================================
-
     @log_action
     def register_patient(self):
-        print("\n  ─── Register New Patient ───")
+        print("\n Register New Patient")
         try:
             name        = input("  Full Name       : ").strip()
             age         = int(input("  Age             : "))
@@ -1038,19 +969,19 @@ class Hospital:
             blood_group = input("  Blood Group     : ").strip()
             p = Patient(name, age, gender, phone, address, blood_group)
             self._patients.append(p)
-            save_patient_to_file(p)           # ← auto-create patient file
-            print(f"\n  ✔ Patient registered successfully! ID: {p.id}")
+            save_patient_to_file(p) 
+            print(f"\n  Patient registered successfully! ID: {p.id}")
             print(f"  {p}")
         except ValueError as e:
-            print(f"  ✘ Error: {e}")
+            print(f"  Error: {e}")
 
     @log_action
     def update_patient(self):
-        print("\n  ─── Update Patient ───")
+        print("\n  Update Patient")
         pid = input("  Enter Patient ID: ").strip().upper()
         p = self._recursive_find(self._patients, pid)
         if not p:
-            print("  ✘ Patient not found.")
+            print("  Patient not found.")
             return
         print(f"  Current: {p}")
         print("  (Press Enter to keep current value)")
@@ -1063,12 +994,12 @@ class Hospital:
             blood_group = input("  New Blood Group : ").strip() or None
             p.update(name, age, phone, address, blood_group)
             save_patient_to_file(p)           # ← overwrite patient file with latest data
-            print("  ✔ Patient updated successfully.")
+            print("  Patient updated successfully.")
         except ValueError as e:
-            print(f"  ✘ Error: {e}")
+            print(f"  Error: {e}")
 
     def search_patient(self):
-        print("\n  ─── Search Patient ───")
+        print("\n Search Patient")
         print("  1. Search by ID")
         print("  2. Search by Name")
         choice = input("  Choice: ").strip()
@@ -1089,16 +1020,16 @@ class Hospital:
                 for p in results:
                     print(f"  {p}")
             else:
-                print("  ✘ No patients found with that name.")
+                print("  No patients found with that name.")
         else:
-            print("  ✘ Invalid choice.")
+            print("  Invalid choice.")
 
     def view_patient_history(self):
-        print("\n  ─── Patient History ───")
+        print("\n  Patient History")
         pid = input("  Patient ID: ").strip().upper()
         patient = self._recursive_find(self._patients, pid)
         if not patient:
-            print("  ✘ Patient not found.")
+            print(" Patient not found.")
             return
         print(f"\n  Patient: {patient.name} | ID: {patient.id}")
         print(f"  Blood Group: {patient.blood_group}")
@@ -1109,9 +1040,9 @@ class Hospital:
         for r in records:
             print(f"    {r}")
             for d in r.diagnoses:
-                print(f"      Diagnosis: {d}")
+                print(f"Diagnosis: {d}")
             for pr in r.prescriptions:
-                print(f"      Rx: {pr['medicine']} | Dosage: {pr['dosage']} | {pr['days']} days")
+                print(f"Rx: {pr['medicine']} | Dosage: {pr['dosage']} | {pr['days']} days")
 
         # Lab reports
         labs = [l for l in self._lab_reports if l.patient_id == pid]
@@ -1129,17 +1060,15 @@ class Hospital:
         if not self._patients:
             print("  No patients registered.")
             return
-        print(f"\n  ─── All Patients ({len(self._patients)}) ───")
+        print(f"\n All Patients ({len(self._patients)})")
         for p in self._patients:
             print(f"  {p}")
 
-    # =========================================================================
     # DOCTOR MANAGEMENT
-    # =========================================================================
 
     @log_action
     def add_doctor(self):
-        print("\n  ─── Add New Doctor ───")
+        print("\n  Add New Doctor")
         try:
             name   = input("  Full Name        : ").strip()
             age    = int(input("  Age              : "))
@@ -1150,19 +1079,19 @@ class Hospital:
             fee    = float(input("  Consultation Fee : ₹"))
             d = Doctor(name, age, gender, phone, address, spec, fee)
             self._doctors.append(d)
-            save_doctor_to_file(d)            # ← auto-create doctor file
-            print(f"\n  ✔ Doctor added! ID: {d.id}")
+            save_doctor_to_file(d)          
+            print(f"\n  Doctor added! ID: {d.id}")
             print(f"  {d}")
         except ValueError as e:
-            print(f"  ✘ Error: {e}")
+            print(f"  Error: {e}")
 
     @log_action
     def update_doctor(self):
-        print("\n  ─── Update Doctor ───")
+        print("\n Update Doctor")
         did = input("  Doctor ID: ").strip().upper()
         d = self._recursive_find(self._doctors, did)
         if not d:
-            print("  ✘ Doctor not found.")
+            print(" Doctor not found.")
             return
         print(f"  Current: {d}")
         print("  (Press Enter to keep current value)")
@@ -1174,17 +1103,17 @@ class Hospital:
             fee_s = input("  New Fee   : ").strip()
             fee   = float(fee_s) if fee_s else None
             d.update(name, phone, addr, spec, fee)
-            save_doctor_to_file(d)            # ← overwrite doctor file with latest data
-            print("  ✔ Doctor updated.")
+            save_doctor_to_file(d)        
+            print(" Doctor updated.")
         except ValueError as e:
-            print(f"  ✘ Error: {e}")
+            print(f" Error: {e}")
 
     def manage_doctor_slots(self):
-        print("\n  ─── Manage Doctor Slots ───")
+        print("\n  Manage Doctor Slots")
         did = input("  Doctor ID: ").strip().upper()
         d = self._recursive_find(self._doctors, did)
         if not d:
-            print("  ✘ Doctor not found.")
+            print(" Doctor not found.")
             return
         print(f"  Doctor: {d.name} | Current Slots: {d.available_slots}")
         print("  1. Add Slot   2. Remove Slot   3. View Slots")
@@ -1204,7 +1133,7 @@ class Hospital:
             else:
                 print("  No slots available.")
         else:
-            print("  ✘ Invalid choice.")
+            print("  Invalid choice.")
 
     def list_all_doctors(self):
         if not self._doctors:
@@ -1212,17 +1141,15 @@ class Hospital:
             return
         # Lambda: sort doctors by consultation fee
         sorted_docs = sorted(self._doctors, key=lambda d: d.consultation_fee)
-        print(f"\n  ─── All Doctors (sorted by fee, {len(sorted_docs)}) ───")
+        print(f"\n All Doctors (sorted by fee, {len(sorted_docs)})")
         for d in sorted_docs:
             print(f"  {d} | Spec={d.specialization} | Fee=₹{d.consultation_fee:.2f}")
 
-    # =========================================================================
     # NURSE MANAGEMENT
-    # =========================================================================
 
     @log_action
     def add_nurse(self):
-        print("\n  ─── Add New Nurse ───")
+        print("\n Add New Nurse")
         try:
             name   = input("  Full Name   : ").strip()
             age    = int(input("  Age         : "))
@@ -1237,28 +1164,28 @@ class Hospital:
             shift = Nurse.SHIFTS[sc] if 0 <= sc < len(Nurse.SHIFTS) else Nurse.SHIFTS[0]
             n = Nurse(name, age, gender, phone, address, dept, shift)
             self._nurses.append(n)
-            save_nurse_to_file(n)             # ← auto-create nurse file
-            print(f"\n  ✔ Nurse added! ID: {n.id}")
+            save_nurse_to_file(n)          
+            print(f"\n  Nurse added ID: {n.id}")
         except (ValueError, IndexError) as e:
-            print(f"  ✘ Error: {e}")
+            print(f" Error: {e}")
 
     def assign_nurse_department(self):
-        print("\n  ─── Assign Nurse Department ───")
+        print("\n Assign Nurse Department")
         nid = input("  Nurse ID  : ").strip().upper()
         n = self._recursive_find(self._nurses, nid)
         if not n:
-            print("  ✘ Nurse not found.")
+            print("  Nurse not found.")
             return
         dept = input("  Department: ").strip()
         n.assign_department(dept)
-        save_nurse_to_file(n)                 # ← overwrite nurse file with new department
+        save_nurse_to_file(n)             
 
     def manage_nurse_shift(self):
-        print("\n  ─── Manage Nurse Shift ───")
+        print("\n Manage Nurse Shift")
         nid = input("  Nurse ID: ").strip().upper()
         n = self._recursive_find(self._nurses, nid)
         if not n:
-            print("  ✘ Nurse not found.")
+            print("  Nurse not found.")
             return
         print(f"  Current Shift: {n.shift}")
         for i, s in enumerate(Nurse.SHIFTS, 1):
@@ -1266,35 +1193,33 @@ class Hospital:
         try:
             sc = int(input("  New Shift (1-3): ").strip()) - 1
             n.change_shift(Nurse.SHIFTS[sc])
-            save_nurse_to_file(n)             # ← overwrite nurse file with new shift
+            save_nurse_to_file(n)          
         except (ValueError, IndexError):
-            print("  ✘ Invalid selection.")
+            print("  Invalid selection.")
 
     def list_all_nurses(self):
         if not self._nurses:
             print("  No nurses registered.")
             return
-        print(f"\n  ─── All Nurses ({len(self._nurses)}) ───")
+        print(f"\n  All Nurses ({len(self._nurses)})")
         for n in self._nurses:
             print(f"  {n} | Dept={n.department} | Shift={n.shift}")
 
-    # =========================================================================
     # APPOINTMENT MANAGEMENT
-    # =========================================================================
 
     @log_action
     def book_appointment(self):
-        print("\n  ─── Book Appointment ───")
+        print("\n Book Appointment")
         try:
             pid = input("  Patient ID : ").strip().upper()
             patient = self._recursive_find(self._patients, pid)
             if not patient:
-                print("  ✘ Patient not found.")
+                print("  Patient not found.")
                 return
             did = input("  Doctor ID  : ").strip().upper()
             doctor = self._recursive_find(self._doctors, did)
             if not doctor:
-                print("  ✘ Doctor not found.")
+                print("  Doctor not found.")
                 return
             print(f"  Available slots for Dr. {doctor.name}:")
             if not doctor.available_slots:
@@ -1304,33 +1229,32 @@ class Hospital:
                 print(f"    {i}. {s}")
             sc = int(input("  Select Slot #: ").strip()) - 1
             if not (0 <= sc < len(doctor.available_slots)):
-                print("  ✘ Invalid slot selection.")
+                print("  Invalid slot selection.")
                 return
             slot   = doctor.available_slots[sc]
             reason = input("  Reason      : ").strip() or "General Checkup"
             appt = Appointment(pid, did, slot, reason)
             doctor.remove_slot(slot)
             self._appointments.append(appt)
-            save_appointment_to_file(appt)    # ← auto-create appointment file
-            print(f"\n  ✔ Appointment booked! ID: {appt.id}")
+            save_appointment_to_file(appt)  
+            print(f"\n  Appointment booked! ID: {appt.id}")
             print(f"  {appt}")
         except (ValueError, IndexError) as e:
-            print(f"  ✘ Error: {e}")
+            print(f"  Error: {e}")
 
     @log_action
     def cancel_appointment(self):
-        print("\n  ─── Cancel Appointment ───")
+        print("\n  Cancel Appointment")
         aid = input("  Appointment ID: ").strip().upper()
         appt = self._recursive_find(self._appointments, aid)
         if not appt:
             print("  ✘ Appointment not found.")
             return
         appt.cancel()
-        save_appointment_to_file(appt)        # ← overwrite with cancelled status
-
+        save_appointment_to_file(appt)      
     @log_action
     def reschedule_appointment(self):
-        print("\n  ─── Reschedule Appointment ───")
+        print("\n  Reschedule Appointment")
         aid = input("  Appointment ID        : ").strip().upper()
         appt = self._recursive_find(self._appointments, aid)
         if not appt:
@@ -1338,10 +1262,9 @@ class Hospital:
             return
         new_dt = input("  New DateTime (YYYY-MM-DD HH:MM): ").strip()
         appt.reschedule(new_dt)
-        save_appointment_to_file(appt)        # ← overwrite with rescheduled date/time
-
+        save_appointment_to_file(appt)       
     def view_appointments(self):
-        print("\n  ─── View Appointments ───")
+        print("\n View Appointments")
         print("  1. All Appointments")
         print("  2. By Patient ID")
         print("  3. By Doctor ID")
@@ -1737,14 +1660,38 @@ class Hospital:
 
     def load_all_data(self):
         print("\n  ─── Loading All Data ───")
-        self._patients     = [Patient.from_dict(d) for d in load_data(PATIENTS_FILE)]
-        self._doctors      = [Doctor.from_dict(d)  for d in load_data(DOCTORS_FILE)]
-        self._appointments = [Appointment.from_dict(d) for d in load_data(APPOINTMENTS_FILE)]
-        self._medicines    = [Medicine.from_dict(d) for d in load_data(MEDICINES_FILE)]
-        self._records      = [MedicalRecord.from_dict(d) for d in load_data(RECORDS_FILE)]
-        self._bills        = [Bill.from_dict(d)    for d in load_data(BILLS_FILE)]
-        self._nurses       = [Nurse.from_dict(d)   for d in load_data("nurses.json")]
-        self._lab_reports  = [LabReport.from_dict(d) for d in load_data("lab_reports.json")]
+        # FIX: use clear() + extend() instead of reassignment ( self._x = [...] ).
+        # Reassignment creates a brand-new list object; any nurse (or other record)
+        # appended to the old list after the last save would be silently discarded
+        # the next time load_all_data() was called — making "List All Nurses" show
+        # nothing immediately after "Add Nurse" when the user triggers a reload.
+        self._patients.clear()
+        self._patients.extend(Patient.from_dict(d) for d in load_data(PATIENTS_FILE))
+
+        self._doctors.clear()
+        self._doctors.extend(Doctor.from_dict(d) for d in load_data(DOCTORS_FILE))
+
+        self._appointments.clear()
+        self._appointments.extend(
+            Appointment.from_dict(d) for d in load_data(APPOINTMENTS_FILE))
+
+        self._medicines.clear()
+        self._medicines.extend(Medicine.from_dict(d) for d in load_data(MEDICINES_FILE))
+
+        self._records.clear()
+        self._records.extend(
+            MedicalRecord.from_dict(d) for d in load_data(RECORDS_FILE))
+
+        self._bills.clear()
+        self._bills.extend(Bill.from_dict(d) for d in load_data(BILLS_FILE))
+
+        self._nurses.clear()
+        self._nurses.extend(Nurse.from_dict(d) for d in load_data("nurses.json"))
+
+        self._lab_reports.clear()
+        self._lab_reports.extend(
+            LabReport.from_dict(d) for d in load_data("lab_reports.json"))
+
         print(f"  ✔ Loaded: {len(self._patients)} patients, {len(self._doctors)} doctors, "
               f"{len(self._nurses)} nurses, {len(self._appointments)} appointments.")
 
