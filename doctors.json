@@ -1,0 +1,15 @@
+[
+    {
+        "id": "047444B9",
+        "name": "asdfgh",
+        "age": 123,
+        "gender": "m",
+        "phone": "9876545678",
+        "address": "iuytrfdcvbnjk",
+        "role": "Doctor",
+        "specialization": "asdfcxz",
+        "consultation_fee": 23.0,
+        "available_slots": [],
+        "department": "asdfcxz"
+    }
+]

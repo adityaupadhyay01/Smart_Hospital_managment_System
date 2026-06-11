@@ -1,48 +1,31 @@
 from hospital.hospital import Hospital
-from menus.menus import (
-    display_main_menu,
-    patient_menu, doctor_menu, nurse_menu,
-    appointment_menu, medical_records_menu,
-    lab_menu, pharmacy_menu, billing_menu,
-)
+from menus.menus import (display_main_menu, patient_menu, doctor_menu,
+    nurse_menu, appointment_menu, medical_records_menu,
+    lab_menu, pharmacy_menu, billing_menu)
 
 def main():
-    hospital = Hospital("Smart City Hospital")
-    print("\n  Welcome to SMART HOSPITAL MANAGEMENT SYSTEM")
-    print(f"  Hospital: {hospital._name}")
-
-    # Auto-load persisted data on startup
-    hospital.load_all_data()
-
+    h = Hospital("Smart City Hospital")
+    print(f"\n  Welcome — {h._name}")
+    h.load_all_data()
+    actions = {
+        "1": patient_menu, "2": doctor_menu, "3": nurse_menu,
+        "4": appointment_menu, "5": medical_records_menu, "6": lab_menu,
+        "7": pharmacy_menu, "8": billing_menu,
+        "9": lambda h: h.generate_report(),
+        "10": lambda h: h.save_all_data(),
+        "11": lambda h: h.load_all_data(),
+    }
     while True:
         display_main_menu()
-        choice = input("\n  Enter your choice: ").strip()
+        ch = input("  Choice: ").strip()
+        if ch == "0":
+            if input("  Save before exit? y/n: ").strip().lower() == "y": h.save_all_data()
+            print("  Goodbye!"); break
         try:
-            if   choice == "1":  patient_menu(hospital)
-            elif choice == "2":  doctor_menu(hospital)
-            elif choice == "3":  nurse_menu(hospital)
-            elif choice == "4":  appointment_menu(hospital)
-            elif choice == "5":  medical_records_menu(hospital)
-            elif choice == "6":  lab_menu(hospital)
-            elif choice == "7":  pharmacy_menu(hospital)
-            elif choice == "8":  billing_menu(hospital)
-            elif choice == "9":  hospital.generate_report()
-            elif choice == "10": hospital.save_all_data()
-            elif choice == "11": hospital.load_all_data()
-            elif choice == "0":
-                save_choice = input("\n  Save data before exiting? (y/n): ").strip().lower()
-                if save_choice == "y":
-                    hospital.save_all_data()
-                print("\n  Thank you for using Smart Hospital Management System!")
-                print("  Goodbye!\n")
-                break
-            else:
-                print("  Invalid choice. Please enter 0-11.")
-        except KeyboardInterrupt:
-            print("\n\n  Interrupted. Returning to main menu.")
-        except Exception as e:
-            print(f"\n  Unexpected error: {e}")
-
+            if ch in actions: actions[ch](h)
+            else: print("  ✘ Invalid choice.")
+        except KeyboardInterrupt: print("\n  Back to menu.")
+        except Exception as e: print(f"  ✘ Error: {e}")
 
 if __name__ == "__main__":
     main()

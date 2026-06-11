@@ -1,0 +1,13 @@
+[
+    {
+        "id": "6557B702",
+        "name": "Asdf",
+        "age": 19,
+        "gender": "f",
+        "phone": "1234567890",
+        "address": "asdfghjkl",
+        "role": "Nurse",
+        "department": "asdfg",
+        "shift": "Night (10PM-6AM)"
+    }
+]

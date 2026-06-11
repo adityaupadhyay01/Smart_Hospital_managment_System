@@ -1,771 +1,350 @@
-# Hospital class (Composition hub)
-# Owns all entity lists and exposes every management operation.
-
 from datetime import datetime, date
-
-from config import (PATIENTS_FILE, DOCTORS_FILE, APPOINTMENTS_FILE,
-                    MEDICINES_FILE, RECORDS_FILE, BILLS_FILE,
-                    NURSES_FILE, LAB_REPORTS_FILE)
-
-from models.patient       import Patient
-from models.doctor        import Doctor
-from models.nurse         import Nurse
-from models.appointment   import Appointment
+from config import *
+from models.patient        import Patient
+from models.doctor         import Doctor
+from models.nurse          import Nurse
+from models.appointment    import Appointment
 from models.medical_record import MedicalRecord
-from models.medicine      import Medicine
-from models.lab_report    import LabReport
-from models.bill          import Bill
+from models.medicine       import Medicine
+from models.lab_report     import LabReport
+from models.bill           import Bill
+from utils.file_io         import save_data, load_data
+from utils.decorators      import log_action
+from utils.file_persistence import (save_patient_to_file, save_doctor_to_file,
+    save_nurse_to_file, save_appointment_to_file, save_record_to_file,
+    save_medicine_to_file, save_bill_to_file, save_lab_report_to_file)
 
-from utils.file_io          import save_data, load_data
-from utils.decorators       import log_action
-from utils.file_persistence import (
-    save_patient_to_file, save_doctor_to_file, save_nurse_to_file,
-    save_appointment_to_file, save_record_to_file, save_medicine_to_file,
-    save_bill_to_file, save_lab_report_to_file,
-)
+def _inp(prompt): return input(f"  {prompt}").strip()
 
 class Hospital:
-    """
-    Central class for the Smart Hospital Management System.
-    Uses Composition to manage all entity collections.
-    """
+    def __init__(self, name="Smart Hospital"):
+        self._name = name
+        self._patients, self._doctors, self._nurses = [], [], []
+        self._appointments, self._records, self._lab_reports = [], [], []
+        self._medicines, self._bills = [], []
 
-    def __init__(self, name: str = "Smart Hospital"):
-        self._name         = name
-        self._patients:     list[Patient]       = []
-        self._doctors:      list[Doctor]        = []
-        self._nurses:       list[Nurse]         = []
-        self._appointments: list[Appointment]   = []
-        self._records:      list[MedicalRecord] = []
-        self._lab_reports:  list[LabReport]     = []
-        self._medicines:    list[Medicine]      = []
-        self._bills:        list[Bill]          = []
+    def _find(self, col, tid, i=0):
+        if i >= len(col): return None
+        return col[i] if col[i].id == tid else self._find(col, tid, i+1)
 
-    # HELPER: recursive search by id
-
-    def _recursive_find(self, collection: list, target_id: str, index: int = 0):
-        """
-        Recursion: traverse a list to find an item by its .id attribute.
-        Returns the item or None.
-        """
-        if index >= len(collection):
-            return None
-        if collection[index].id == target_id:
-            return collection[index]
-        return self._recursive_find(collection, target_id, index + 1)
-
-#PATIENT MANAGEMENT
-
+    # ── PATIENTS ─────────────────────────────────────────────────────────────
     @log_action
     def register_patient(self):
-        print("\n  Register New Patient")
         try:
-            name        = input("  Full Name       : ").strip()
-            age         = int(input("  Age             : "))
-            gender      = input("  Gender (M/F/O)  : ").strip()
-            phone       = input("  Phone           : ").strip()
-            address     = input("  Address         : ").strip()
-            blood_group = input("  Blood Group     : ").strip()
-            p = Patient(name, age, gender, phone, address, blood_group)
-            self._patients.append(p)
-            save_patient_to_file(p)
-            print(f"\n  Patient registered successfully! ID: {p.id}")
-            print(f"  {p}")
-        except ValueError as e:
-            print(f" Error: {e}")
+            p = Patient(_inp("Name      : "), int(_inp("Age       : ")),
+                        _inp("Gender    : "), _inp("Phone     : "),
+                        _inp("Address   : "), _inp("BloodGroup: "))
+            self._patients.append(p); save_patient_to_file(p)
+            print(f"  ✔ Patient registered. ID: {p.id}")
+        except ValueError as e: print(f"  ✘ {e}")
 
     @log_action
     def update_patient(self):
-        print("\n Update Patient")
-        pid = input("  Enter Patient ID: ").strip().upper()
-        p = self._recursive_find(self._patients, pid)
-        if not p:
-            print(" Patient not found.")
-            return
-        print(f"  Current: {p}")
-        print("  (Press Enter to keep current value)")
+        p = self._find(self._patients, _inp("Patient ID: ").upper())
+        if not p: print("  ✘ Not found."); return
         try:
-            name        = input("  New Name        : ").strip() or None
-            age_str     = input("  New Age         : ").strip()
-            age         = int(age_str) if age_str else None
-            phone       = input("  New Phone       : ").strip() or None
-            address     = input("  New Address     : ").strip() or None
-            blood_group = input("  New Blood Group : ").strip() or None
-            p.update(name, age, phone, address, blood_group)
-            save_patient_to_file(p)
-            print(" Patient updated successfully.")
-        except ValueError as e:
-            print(f" Error: {e}")
+            n,a,ph,ad,bg = (_inp(f) or None for f in ["New Name: ","New Age : ","New Phone: ","New Addr : ","New BG   : "])
+            p.update(n, int(a) if a else None, ph, ad, bg)
+            save_patient_to_file(p); print("  ✔ Updated.")
+        except ValueError as e: print(f"  ✘ {e}")
 
     def search_patient(self):
-        print("\n Search Patient")
-        print("  1. Search by ID")
-        print("  2. Search by Name")
-        choice = input("  Choice: ").strip()
-        if choice == "1":
-            pid = input("  Patient ID: ").strip().upper()
-            p = self._recursive_find(self._patients, pid)
-            if p:
-                print(f"\n  {p}")
-                print(f"  Blood Group: {p.blood_group} | Registered: {p.registration_date}")
-                history = ', '.join(p.medical_history) if p.medical_history else 'None'
-                print(f"  Medical History: {history}")
-            else:
-                print(" Patient not found.")
-        elif choice == "2":
-            name = input("  Patient Name (partial): ").strip().lower()
-            # List comprehension
-            results = [p for p in self._patients if name in p.name.lower()]
-            if results:
-                for p in results:
-                    print(f"  {p}")
-            else:
-                print(" No patients found with that name.")
-        else:
-            print(" Invalid choice.")
+        ch = _inp("1=ID  2=Name: ")
+        if ch == "1":
+            p = self._find(self._patients, _inp("ID: ").upper())
+            if p: print(f"  {p}\n  BG:{p.blood_group} Reg:{p.registration_date}")
+            else: print("  ✘ Not found.")
+        elif ch == "2":
+            q = _inp("Name: ").lower()
+            res = [p for p in self._patients if q in p.name.lower()]
+            [print(f"  {p}") for p in res] if res else print("  ✘ None found.")
 
     def view_patient_history(self):
-        print("\n Patient History")
-        pid = input("  Patient ID: ").strip().upper()
-        patient = self._recursive_find(self._patients, pid)
-        if not patient:
-            print(" Patient not found.")
-            return
-        print(f"\n  Patient: {patient.name} | ID: {patient.id}")
-        print(f"  Blood Group: {patient.blood_group}")
-
-        records = [r for r in self._records if r.patient_id == pid]
-        print(f"\n  Medical Records ({len(records)}):")
-        for r in records:
-            print(f"    {r}")
-            for d in r.diagnoses:
-                print(f"      Diagnosis: {d}")
-            for pr in r.prescriptions:
-                print(f"      Rx: {pr['medicine']} | Dosage: {pr['dosage']} | {pr['days']} days")
-
+        pid = _inp("Patient ID: ").upper()
+        p = self._find(self._patients, pid)
+        if not p: print("  ✘ Not found."); return
+        print(f"\n  {p} | BG:{p.blood_group}")
+        recs = [r for r in self._records if r.patient_id == pid]
+        print(f"  Records({len(recs)}):"); [print(f"    {r}") for r in recs]
         labs = [l for l in self._lab_reports if l.patient_id == pid]
-        print(f"\n  Lab Reports ({len(labs)}):")
-        for l in labs:
-            print(f"    {l}")
-
+        print(f"  Labs({len(labs)}):"); [print(f"    {l}") for l in labs]
         bills = [b for b in self._bills if b.patient_id == pid]
-        print(f"\n  Bills ({len(bills)}):")
-        for b in bills:
-            print(f"    {b}")
+        print(f"  Bills({len(bills)}):"); [print(f"    {b}") for b in bills]
 
     def list_all_patients(self):
-        if not self._patients:
-            print("  No patients registered.")
-            return
-        print(f"\n All Patients ({len(self._patients)})")
-        for p in self._patients:
-            print(f"  {p}")
+        if not self._patients: print("  No patients."); return
+        [print(f"  {p}") for p in self._patients]
 
-#DOCTOR MANAGEMENT
-
+    # ── DOCTORS ───────────────────────────────────────────────────────────────
     @log_action
     def add_doctor(self):
-        print("\n Add New Doctor")
         try:
-            name    = input("  Full Name        : ").strip()
-            age     = int(input("  Age              : "))
-            gender  = input("  Gender (M/F/O)   : ").strip()
-            phone   = input("  Phone            : ").strip()
-            address = input("  Address          : ").strip()
-            spec    = input("  Specialization   : ").strip()
-            fee     = float(input("  Consultation Fee : ₹"))
-            d = Doctor(name, age, gender, phone, address, spec, fee)
-            self._doctors.append(d)
-            save_doctor_to_file(d)
-            print(f"\n Doctor added! ID: {d.id}")
-            print(f"  {d}")
-        except ValueError as e:
-            print(f" Error: {e}")
+            d = Doctor(_inp("Name : "), int(_inp("Age  : ")), _inp("Gender: "),
+                       _inp("Phone: "), _inp("Addr : "), _inp("Spec : "),
+                       float(_inp("Fee  : ₹")))
+            self._doctors.append(d); save_doctor_to_file(d)
+            print(f"  ✔ Doctor added. ID: {d.id}")
+        except ValueError as e: print(f"  ✘ {e}")
 
     @log_action
     def update_doctor(self):
-        print("\n Update Doctor")
-        did = input("  Doctor ID: ").strip().upper()
-        d = self._recursive_find(self._doctors, did)
-        if not d:
-            print(" Doctor not found.")
-            return
-        print(f"  Current: {d}")
-        print("  (Press Enter to keep current value)")
+        d = self._find(self._doctors, _inp("Doctor ID: ").upper())
+        if not d: print("  ✘ Not found."); return
         try:
-            name  = input("  New Name  : ").strip() or None
-            phone = input("  New Phone : ").strip() or None
-            addr  = input("  New Addr  : ").strip() or None
-            spec  = input("  New Spec  : ").strip() or None
-            fee_s = input("  New Fee   : ").strip()
-            fee   = float(fee_s) if fee_s else None
-            d.update(name, phone, addr, spec, fee)
-            save_doctor_to_file(d)
-            print(" Doctor updated.")
-        except ValueError as e:
-            print(f" Error: {e}")
+            n,ph,ad,sp,fs = (_inp(f) or None for f in ["New Name: ","New Phone: ","New Addr: ","New Spec: ","New Fee : "])
+            d.update(n, ph, ad, sp, float(fs) if fs else None)
+            save_doctor_to_file(d); print("  ✔ Updated.")
+        except ValueError as e: print(f"  ✘ {e}")
 
     def manage_doctor_slots(self):
-        print("\n Manage Doctor Slots")
-        did = input("  Doctor ID: ").strip().upper()
-        d = self._recursive_find(self._doctors, did)
-        if not d:
-            print(" Doctor not found.")
-            return
-        print(f"  Doctor: {d.name} | Current Slots: {d.available_slots}")
-        print("  1. Add Slot   2. Remove Slot   3. View Slots")
-        ch = input("  Choice: ").strip()
-        if ch == "1":
-            slot = input("  Slot (YYYY-MM-DD HH:MM): ").strip()
-            d.add_slot(slot)
-        elif ch == "2":
-            slot = input("  Slot to remove: ").strip()
-            d.remove_slot(slot)
-        elif ch == "3":
-            slots = d.available_slots
-            if slots:
-                print("  Available Slots:")
-                for s in slots:
-                    print(f"    - {s}")
-            else:
-                print("  No slots available.")
-        else:
-            print(" Invalid choice.")
+        d = self._find(self._doctors, _inp("Doctor ID: ").upper())
+        if not d: print("  ✘ Not found."); return
+        ch = _inp("1=Add 2=Remove 3=View: ")
+        if ch == "1": d.add_slot(_inp("Slot (YYYY-MM-DD HH:MM): "))
+        elif ch == "2": d.remove_slot(_inp("Slot to remove: "))
+        elif ch == "3": [print(f"  - {s}") for s in d.available_slots] or print("  None.")
 
     def list_all_doctors(self):
-        if not self._doctors:
-            print("  No doctors registered.")
-            return
-        # Lambda: sort by consultation fee
-        sorted_docs = sorted(self._doctors, key=lambda d: d.consultation_fee)
-        print(f"\n All Doctors (sorted by fee, {len(sorted_docs)})")
-        for d in sorted_docs:
-            print(f"  {d} | Spec={d.specialization} | Fee=₹{d.consultation_fee:.2f}")
+        if not self._doctors: print("  No doctors."); return
+        [print(f"  {d} | ₹{d.consultation_fee:.2f}")
+         for d in sorted(self._doctors, key=lambda d: d.consultation_fee)]
 
-    #NURSE MANAGEMENT
-    
+    # ── NURSES ────────────────────────────────────────────────────────────────
     @log_action
     def add_nurse(self):
-        print("\n Add New Nurse")
         try:
-            name    = input("  Full Name   : ").strip()
-            age     = int(input("  Age         : "))
-            gender  = input("  Gender      : ").strip()
-            phone   = input("  Phone       : ").strip()
-            address = input("  Address     : ").strip()
-            dept    = input("  Department  : ").strip()
-            print("  Shifts:")
-            for i, s in enumerate(Nurse.SHIFTS, 1):
-                print(f"    {i}. {s}")
-            sc    = int(input("  Choose Shift (1-3): ").strip()) - 1
-            shift = Nurse.SHIFTS[sc] if 0 <= sc < len(Nurse.SHIFTS) else Nurse.SHIFTS[0]
-            n = Nurse(name, age, gender, phone, address, dept, shift)
-            self._nurses.append(n)
-            save_nurse_to_file(n)
-            print(f"\n Nurse added! ID: {n.id}")
-        except (ValueError, IndexError) as e:
-            print(f" Error: {e}")
+            [print(f"  {i+1}. {s}") for i,s in enumerate(Nurse.SHIFTS)]
+            sc = int(_inp("Shift (1-3): ")) - 1
+            n = Nurse(_inp("Name : "), int(_inp("Age  : ")), _inp("Gender: "),
+                      _inp("Phone: "), _inp("Addr : "), _inp("Dept : "),
+                      Nurse.SHIFTS[sc] if 0 <= sc < 3 else Nurse.SHIFTS[0])
+            self._nurses.append(n); save_nurse_to_file(n)
+            print(f"  ✔ Nurse added. ID: {n.id}")
+        except (ValueError, IndexError) as e: print(f"  ✘ {e}")
 
     def assign_nurse_department(self):
-        print("\n Assign Nurse Department")
-        nid = input("  Nurse ID  : ").strip().upper()
-        n = self._recursive_find(self._nurses, nid)
-        if not n:
-            print(" Nurse not found.")
-            return
-        dept = input("  Department: ").strip()
-        n.assign_department(dept)
-        save_nurse_to_file(n)
+        n = self._find(self._nurses, _inp("Nurse ID: ").upper())
+        if not n: print("  ✘ Not found."); return
+        n.assign_department(_inp("Dept: ")); save_nurse_to_file(n)
 
     def manage_nurse_shift(self):
-        print("\n Manage Nurse Shift")
-        nid = input("  Nurse ID: ").strip().upper()
-        n = self._recursive_find(self._nurses, nid)
-        if not n:
-            print(" Nurse not found.")
-            return
-        print(f"  Current Shift: {n.shift}")
-        for i, s in enumerate(Nurse.SHIFTS, 1):
-            print(f"  {i}. {s}")
+        n = self._find(self._nurses, _inp("Nurse ID: ").upper())
+        if not n: print("  ✘ Not found."); return
+        [print(f"  {i+1}. {s}") for i,s in enumerate(Nurse.SHIFTS)]
         try:
-            sc = int(input("  New Shift (1-3): ").strip()) - 1
-            n.change_shift(Nurse.SHIFTS[sc])
-            save_nurse_to_file(n)
-        except (ValueError, IndexError):
-            print(" Invalid selection.")
+            sc = int(_inp("New shift (1-3): ")) - 1
+            n.change_shift(Nurse.SHIFTS[sc]); save_nurse_to_file(n)
+        except (ValueError, IndexError): print("  ✘ Invalid.")
 
     def list_all_nurses(self):
-        if not self._nurses:
-            print("  No nurses registered.")
-            return
-        print(f"\n All Nurses ({len(self._nurses)})")
-        for n in self._nurses:
-            print(f"  {n} | Dept={n.department} | Shift={n.shift}")
+        if not self._nurses: print("  No nurses registered."); return
+        [print(f"  {n} | {n.department} | {n.shift}") for n in self._nurses]
 
-    # APPOINTMENT MANAGEMENT
-    
+    # ── APPOINTMENTS ──────────────────────────────────────────────────────────
     @log_action
     def book_appointment(self):
-        print("\nBook Appointment")
         try:
-            pid = input("  Patient ID : ").strip().upper()
-            patient = self._recursive_find(self._patients, pid)
-            if not patient:
-                print("  Patient not found.")
-                return
-            did = input("  Doctor ID  : ").strip().upper()
-            doctor = self._recursive_find(self._doctors, did)
-            if not doctor:
-                print(" Doctor not found.")
-                return
-            print(f"  Available slots for Dr. {doctor.name}:")
-            if not doctor.available_slots:
-                print("  No slots available. Please add slots first.")
-                return
-            for i, s in enumerate(doctor.available_slots, 1):
-                print(f"    {i}. {s}")
-            sc = int(input("  Select Slot #: ").strip()) - 1
-            if not (0 <= sc < len(doctor.available_slots)):
-                print(" Invalid slot selection.")
-                return
-            slot   = doctor.available_slots[sc]
-            reason = input("  Reason      : ").strip() or "General Checkup"
-            appt   = Appointment(pid, did, slot, reason)
-            doctor.remove_slot(slot)
-            self._appointments.append(appt)
-            save_appointment_to_file(appt)
-            print(f"\n Appointment booked! ID: {appt.id}")
-            print(f"  {appt}")
-        except (ValueError, IndexError) as e:
-            print(f" Error: {e}")
+            p = self._find(self._patients, _inp("Patient ID: ").upper())
+            if not p: print("  ✘ Patient not found."); return
+            d = self._find(self._doctors, _inp("Doctor ID : ").upper())
+            if not d: print("  ✘ Doctor not found."); return
+            if not d.available_slots: print("  No slots."); return
+            [print(f"  {i+1}. {s}") for i,s in enumerate(d.available_slots)]
+            sc = int(_inp("Slot #: ")) - 1
+            if not (0 <= sc < len(d.available_slots)): print("  ✘ Invalid."); return
+            slot = d.available_slots[sc]; d.remove_slot(slot)
+            a = Appointment(p.id, d.id, slot, _inp("Reason: ") or "General Checkup")
+            self._appointments.append(a); save_appointment_to_file(a)
+            print(f"  ✔ Booked. ID: {a.id}")
+        except (ValueError, IndexError) as e: print(f"  ✘ {e}")
 
     @log_action
     def cancel_appointment(self):
-        print("\nCancel Appointment")
-        aid = input("  Appointment ID: ").strip().upper()
-        appt = self._recursive_find(self._appointments, aid)
-        if not appt:
-            print(" Appointment not found.")
-            return
-        appt.cancel()
-        save_appointment_to_file(appt)
+        a = self._find(self._appointments, _inp("Appt ID: ").upper())
+        if not a: print("  ✘ Not found."); return
+        a.cancel(); save_appointment_to_file(a)
 
     @log_action
     def reschedule_appointment(self):
-        print("\nReschedule Appointment")
-        aid = input("  Appointment ID        : ").strip().upper()
-        appt = self._recursive_find(self._appointments, aid)
-        if not appt:
-            print(" Appointment not found.")
-            return
-        new_dt = input("  New DateTime (YYYY-MM-DD HH:MM): ").strip()
-        appt.reschedule(new_dt)
-        save_appointment_to_file(appt)
+        a = self._find(self._appointments, _inp("Appt ID: ").upper())
+        if not a: print("  ✘ Not found."); return
+        a.reschedule(_inp("New DateTime (YYYY-MM-DD HH:MM): "))
+        save_appointment_to_file(a)
 
     def view_appointments(self):
-        print("\n View Appointments")
-        print("  1. All Appointments")
-        print("  2. By Patient ID")
-        print("  3. By Doctor ID")
-        print("  4. Booked Only")
-        ch = input("  Choice: ").strip()
-        if ch == "1":
-            appts = self._appointments
-        elif ch == "2":
-            pid   = input("  Patient ID: ").strip().upper()
-            appts = [a for a in self._appointments if a.patient_id == pid]
-        elif ch == "3":
-            did   = input("  Doctor ID: ").strip().upper()
-            appts = [a for a in self._appointments if a.doctor_id == did]
-        elif ch == "4":
-            appts = [a for a in self._appointments
-                     if a.status == Appointment.STATUS_BOOKED]
-        else:
-            print(" Invalid choice.")
-            return
-        if not appts:
-            print("  No appointments found.")
-            return
-        for a in appts:
-            print(f"  {a}")
+        ch = _inp("1=All 2=ByPatient 3=ByDoctor 4=Booked: ")
+        if   ch == "1": appts = self._appointments
+        elif ch == "2": appts = [a for a in self._appointments if a.patient_id == _inp("Patient ID: ").upper()]
+        elif ch == "3": appts = [a for a in self._appointments if a.doctor_id  == _inp("Doctor ID : ").upper()]
+        elif ch == "4": appts = [a for a in self._appointments if a.status == Appointment.BOOKED]
+        else: return
+        [print(f"  {a}") for a in appts] if appts else print("  None found.")
 
-    # MEDICAL RECORDS
-    
+    # ── MEDICAL RECORDS ───────────────────────────────────────────────────────
     @log_action
     def add_medical_record(self):
-        print("\n  Create Medical Record")
-        pid = input("  Patient ID: ").strip().upper()
-        patient = self._recursive_find(self._patients, pid)
-        if not patient:
-            print(" Patient not found.")
-            return
-        did = input("  Doctor ID : ").strip().upper()
-        doctor = self._recursive_find(self._doctors, did)
-        if not doctor:
-            print(" Doctor not found.")
-            return
-        mr = MedicalRecord(pid, did)
-        print("  Enter diagnoses (blank to stop):")
-        while True:
-            diag = input("    Diagnosis: ").strip()
-            if not diag:
-                break
-            mr.add_diagnosis(diag)
-            patient.add_history(diag)
-        print("  Enter prescriptions (blank medicine name to stop):")
-        while True:
-            med = input("    Medicine  : ").strip()
-            if not med:
-                break
-            try:
-                dosage = input("    Dosage    : ").strip()
-                days   = int(input("    Days      : ").strip())
-                mr.add_prescription(med, dosage, days)
-            except ValueError:
-                print("  Invalid days value.")
-        notes = input("  Additional Notes: ").strip()
-        if notes:
-            mr.add_notes(notes)
-        self._records.append(mr)
-        save_record_to_file(mr)
-        print(f"\n Medical record created. ID: {mr.id}")
+        p = self._find(self._patients, _inp("Patient ID: ").upper())
+        if not p: print("  ✘ Not found."); return
+        d = self._find(self._doctors, _inp("Doctor ID : ").upper())
+        if not d: print("  ✘ Not found."); return
+        mr = MedicalRecord(p.id, d.id)
+        while (dx := _inp("Diagnosis (blank=stop): ")):
+            mr.add_diagnosis(dx); p.add_history(dx)
+        while (med := _inp("Medicine (blank=stop): ")):
+            try: mr.add_prescription(med, _inp("Dosage: "), int(_inp("Days: ")))
+            except ValueError: print("  ✘ Invalid days.")
+        if n := _inp("Notes: "): mr.add_notes(n)
+        self._records.append(mr); save_record_to_file(mr)
+        print(f"  ✔ Record created. ID: {mr.id}")
 
     def view_medical_records(self):
-        print("\n View Medical Records")
-        pid = input("  Patient ID: ").strip().upper()
-        records = [r for r in self._records if r.patient_id == pid]
-        if not records:
-            print("  No records found for this patient.")
-            return
-        for r in records:
-            print(f"\n  {r}")
-            print(f"    Notes: {r._notes or 'None'}")
-            for d in r.diagnoses:
-                print(f"   Diagnosis: {d}")
-            for pr in r.prescriptions:
-                print(f"    Rx: {pr['medicine']} | {pr['dosage']} | {pr['days']} days")
+        pid = _inp("Patient ID: ").upper()
+        recs = [r for r in self._records if r.patient_id == pid]
+        if not recs: print("  None found."); return
+        for r in recs:
+            print(f"  {r}")
+            [print(f"    Dx: {d}") for d in r.diagnoses]
+            [print(f"    Rx: {p['medicine']} {p['dosage']} {p['days']}d") for p in r.prescriptions]
 
-    # LABORATORY MANAGEMENT
-    
+    # ── LAB REPORTS ───────────────────────────────────────────────────────────
     @log_action
     def create_lab_report(self):
-        print("\n Create Lab Report")
-        pid = input("  Patient ID  : ").strip().upper()
-        patient = self._recursive_find(self._patients, pid)
-        if not patient:
-            print(" Patient not found.")
-            return
-        test_name  = input("  Test Name   : ").strip()
-        technician = input("  Technician  : ").strip() or "Lab Technician"
-        lr = LabReport(pid, test_name, technician)
-        add_result = input("  Add result now? (y/n): ").strip().lower()
-        if add_result == "y":
-            try:
-                result  = input("  Result      : ").strip()
-                remarks = input("  Remarks     : ").strip()
-                cost    = float(input("  Cost (₹)    : "))
-                lr.set_result(result, remarks, cost)
-            except ValueError as e:
-                print(f" Error: {e}")
-        self._lab_reports.append(lr)
-        save_lab_report_to_file(lr)
-        print(f"\n Lab report created. ID: {lr.id}")
+        p = self._find(self._patients, _inp("Patient ID: ").upper())
+        if not p: print("  ✘ Not found."); return
+        lr = LabReport(p.id, _inp("Test Name : "), _inp("Technician: ") or "Lab Tech")
+        if _inp("Add result now? y/n: ").lower() == "y":
+            try: lr.set_result(_inp("Result : "), _inp("Remarks: "), float(_inp("Cost ₹ : ")))
+            except ValueError as e: print(f"  ✘ {e}")
+        self._lab_reports.append(lr); save_lab_report_to_file(lr)
+        print(f"  ✔ Lab report created. ID: {lr.id}")
 
     def view_lab_reports(self):
-        print("\n View Lab Reports")
-        pid = input("  Patient ID: ").strip().upper()
-        reports = [r for r in self._lab_reports if r.patient_id == pid]
-        if not reports:
-            print("  No lab reports found.")
-            return
-        for r in reports:
-            print(f"  {r}")
+        pid = _inp("Patient ID: ").upper()
+        reps = [r for r in self._lab_reports if r.patient_id == pid]
+        [print(f"  {r}") for r in reps] if reps else print("  None found.")
 
-    # PHARMACY MANAGEMENT
-    
+    # ── PHARMACY ──────────────────────────────────────────────────────────────
     @log_action
     def add_medicine(self):
-        print("\n Add Medicine")
         try:
-            name     = input("  Name         : ").strip()
-            category = input("  Category     : ").strip()
-            price    = float(input("  Price (₹)    : "))
-            stock    = int(input("  Stock (units): "))
-            expiry   = input("  Expiry Date (YYYY-MM-DD): ").strip()
-            mfr      = input("  Manufacturer : ").strip() or "Unknown"
-            m = Medicine(name, category, price, stock, expiry, mfr)
-            self._medicines.append(m)
-            save_medicine_to_file(m)
-            print(f"\n Medicine added. ID: {m.id}")
-            print(f"  {m}")
-        except ValueError as e:
-            print(f" Error: {e}")
+            m = Medicine(_inp("Name    : "), _inp("Category: "),
+                         float(_inp("Price ₹ : ")), int(_inp("Stock   : ")),
+                         _inp("Expiry (YYYY-MM-DD): "), _inp("Mfr     : ") or "Unknown")
+            self._medicines.append(m); save_medicine_to_file(m)
+            print(f"  ✔ Medicine added. ID: {m.id}")
+        except ValueError as e: print(f"  ✘ {e}")
 
     def update_medicine_stock(self):
-        print("\n Update Medicine Stock")
-        mid = input("  Medicine ID    : ").strip().upper()
-        med = self._recursive_find(self._medicines, mid)
-        if not med:
-            print(" Medicine not found.")
-            return
-        print(f"  Current Stock: {med.stock}")
-        try:
-            qty = int(input("  Quantity to Add (+) or Remove (-): "))
-            med.update_stock(qty)
-            save_medicine_to_file(med)
-        except ValueError as e:
-            print(f" Error: {e}")
+        m = self._find(self._medicines, _inp("Medicine ID: ").upper())
+        if not m: print("  ✘ Not found."); return
+        try: m.update_stock(int(_inp("Qty (+add/-remove): "))); save_medicine_to_file(m)
+        except ValueError as e: print(f"  ✘ {e}")
 
     def check_medicine_availability(self):
-        print("\n Check Medicine Availability")
-        name    = input("  Medicine Name (partial): ").strip().lower()
-        results = [m for m in self._medicines if name in m.name.lower()]
-        if not results:
-            print("  No medicines found.")
-            return
-        for m in results:
-            status = "Available" if m.is_available() else (
-                "Expired" if m.is_expired() else "✘ Out of Stock")
-            print(f"  {m.name} | Stock={m.stock} | Price=₹{m.price:.2f} | {status}")
+        q = _inp("Name (partial): ").lower()
+        res = [m for m in self._medicines if q in m.name.lower()]
+        [print(f"  {m}") for m in res] if res else print("  None found.")
 
     def check_expiry(self):
-        print("\n Medicines Expiry Check")
-        # Lambda filter
-        expired = list(filter(lambda m: m.is_expired(), self._medicines))
-        if expired:
-            print(f"  EXPIRED Medicines ({len(expired)}):")
-            for m in expired:
-                print(f"  {m.name} | Expiry: {m.expiry_date}")
-        else:
-            print(" No expired medicines.")
-
-        near = []
-        for m in self._medicines:
-            if not m.is_expired():
-                try:
-                    exp   = datetime.strptime(m.expiry_date, "%Y-%m-%d").date()
-                    delta = (exp - date.today()).days
-                    if 0 <= delta <= 30:
-                        near.append((m, delta))
-                except ValueError:
-                    pass
-        if near:
-            print(f"\n  Near-Expiry (within 30 days) ({len(near)}):")
-            for m, d in near:
-                print(f" {m.name} | Expiry: {m.expiry_date} ({d} days left)")
+        exp = [m for m in self._medicines if m.is_expired()]
+        print(f"  Expired ({len(exp)}):"); [print(f"  ⚠ {m.name} | {m.expiry_date}") for m in exp]
+        near = [(m,(datetime.strptime(m.expiry_date,"%Y-%m-%d").date()-date.today()).days)
+                for m in self._medicines if not m.is_expired()
+                and 0 <= (datetime.strptime(m.expiry_date,"%Y-%m-%d").date()-date.today()).days <= 30]
+        if near: print(f"  Near-expiry:"); [print(f"  ⚠ {m.name} | {d}d left") for m,d in near]
 
     def list_all_medicines(self):
-        if not self._medicines:
-            print("  No medicines in pharmacy.")
-            return
-        print(f"\n  All Medicines ({len(self._medicines)})")
-        for m in self._medicines:
-            print(f"  {m}")
+        if not self._medicines: print("  No medicines."); return
+        [print(f"  {m}") for m in self._medicines]
 
-    # BILLING MANAGEMENT
-    
+    # ── BILLING ───────────────────────────────────────────────────────────────
     @log_action
     def create_bill(self):
-        print("\n Create Bill─")
-        pid = input("  Patient ID: ").strip().upper()
-        patient = self._recursive_find(self._patients, pid)
-        if not patient:
-            print("  Patient not found.")
-            return
-        bill = Bill(pid)
-
-        add_cons = input("  Add consultation charge? (y/n): ").strip().lower()
-        if add_cons == "y":
+        p = self._find(self._patients, _inp("Patient ID: ").upper())
+        if not p: print("  ✘ Not found."); return
+        bill = Bill(p.id)
+        if _inp("Add consultation? y/n: ").lower() == "y":
             try:
-                did = input("  Doctor ID: ").strip().upper()
-                doc = self._recursive_find(self._doctors, did)
-                if doc:
-                    bill.add_consultation(doc.consultation_fee, doc.name)
-                    print(f"  Consultation fee ₹{doc.consultation_fee:.2f} added.")
-                else:
-                    amt = float(input("  Manual consultation amount: ₹"))
-                    bill.add_consultation(amt)
-            except ValueError as e:
-                print(f" Error: {e}")
-
-        add_med = input("  Add medicine charges? (y/n): ").strip().lower()
-        while add_med == "y":
+                d = self._find(self._doctors, _inp("Doctor ID: ").upper())
+                if d: bill.add_consultation(d.consultation_fee, d.name)
+                else: bill.add_consultation(float(_inp("Manual amount ₹: ")))
+            except ValueError as e: print(f"  ✘ {e}")
+        while _inp("Add medicine charge? y/n: ").lower() == "y":
             try:
-                mid = input("  Medicine ID: ").strip().upper()
-                med = self._recursive_find(self._medicines, mid)
-                if not med:
-                    print("  Medicine not found.")
-                    break
-                qty        = int(input(f"  Quantity (Stock={med.stock}): "))
-                med.update_stock(-qty)
-                total_cost = med.price * qty
-                bill.add_medicine_charge(total_cost, med.name)
-                print(f"  ₹{total_cost:.2f} added for {med.name} x{qty}.")
-            except ValueError as e:
-                print(f" Error: {e}")
-            add_med = input("  Add another medicine? (y/n): ").strip().lower()
-
-        add_lab = input("  Add lab charges? (y/n): ").strip().lower()
-        while add_lab == "y":
-            try:
-                lid = input("  Lab Report ID: ").strip().upper()
-                lr  = self._recursive_find(self._lab_reports, lid)
-                if lr:
-                    bill.add_lab_charge(lr.cost, lr.test_name)
-                    print(f"  Lab charge ₹{lr.cost:.2f} for '{lr.test_name}' added.")
-                else:
-                    print("  Lab report not found.")
-            except ValueError as e:
-                print(f" Error: {e}")
-            add_lab = input("  Add another lab charge? (y/n): ").strip().lower()
-
-        add_other = input("  Add other charges? (y/n): ").strip().lower()
-        if add_other == "y":
-            try:
-                desc = input("  Description: ").strip()
-                amt  = float(input("  Amount (₹) : "))
-                bill.add_other_charge(amt, desc)
-            except ValueError as e:
-                print(f"  Error: {e}")
-
-        disc_s = input("  Discount (₹, 0 for none): ").strip()
-        try:
-            disc = float(disc_s) if disc_s else 0.0
-            bill.set_discount(disc)
-        except ValueError:
-            disc = 0.0
-
-        self._bills.append(bill)
-        save_bill_to_file(bill, patient.name)
-        print(f"\n  Bill created. ID: {bill.id}")
-        print(f"  Total: ₹{bill.calculate_total():.2f}")
-
-        pay_now = input("  Mark as paid now? (y/n): ").strip().lower()
-        if pay_now == "y":
-            bill.mark_paid()
-            save_bill_to_file(bill, patient.name)
+                m = self._find(self._medicines, _inp("Medicine ID: ").upper())
+                if not m: print("  ✘ Not found."); break
+                qty = int(_inp(f"Qty (stock={m.stock}): "))
+                m.update_stock(-qty); bill.add_medicine_charge(m.price*qty, m.name)
+            except ValueError as e: print(f"  ✘ {e}")
+        while _inp("Add lab charge? y/n: ").lower() == "y":
+            lr = self._find(self._lab_reports, _inp("Lab Report ID: ").upper())
+            if lr: bill.add_lab_charge(lr.cost, lr.test_name)
+            else: print("  ✘ Not found.")
+        if _inp("Add other charge? y/n: ").lower() == "y":
+            try: bill.add_other_charge(float(_inp("Amount ₹: ")), _inp("Desc: "))
+            except ValueError as e: print(f"  ✘ {e}")
+        try: bill.set_discount(float(_inp("Discount ₹ (0=none): ") or "0"))
+        except ValueError: pass
+        self._bills.append(bill); save_bill_to_file(bill, p.name)
+        print(f"  ✔ Bill {bill.id} created. Total ₹{bill.calculate_total():.2f}")
+        if _inp("Mark paid? y/n: ").lower() == "y":
+            bill.mark_paid(); save_bill_to_file(bill, p.name)
 
     def view_bill(self):
-        print("\n  View Bill")
-        bid  = input("  Bill ID: ").strip().upper()
-        bill = self._recursive_find(self._bills, bid)
-        if not bill:
-            print(" Bill not found.")
-            return
-        patient = self._recursive_find(self._patients, bill.patient_id)
-        pname   = patient.name if patient else "Unknown"
-        print(bill.generate_receipt(pname))
+        b = self._find(self._bills, _inp("Bill ID: ").upper())
+        if not b: print("  ✘ Not found."); return
+        pname = (self._find(self._patients, b.patient_id) or type("x", (), {"name":""})()).name
+        print(b.generate_receipt(pname))
 
     def generate_receipt(self):
-        print("\n Generate Receipt")
-        pid = input("  Patient ID: ").strip().upper()
-        patient = self._recursive_find(self._patients, pid)
-        if not patient:
-            print("  Patient not found.")
-            return
-        bills = [b for b in self._bills if b.patient_id == pid]
-        if not bills:
-            print("  No bills found for this patient.")
-            return
-        print(f"\n  Bills for {patient.name} ({len(bills)} total):")
-        for i, b in enumerate(bills, 1):
-            print(f"  {i}. {b}")
+        p = self._find(self._patients, _inp("Patient ID: ").upper())
+        if not p: print("  ✘ Not found."); return
+        bills = [b for b in self._bills if b.patient_id == p.id]
+        if not bills: print("  No bills."); return
+        [print(f"  {i+1}. {b}") for i,b in enumerate(bills)]
         try:
-            sc = int(input("  Select bill #: ")) - 1
-            if 0 <= sc < len(bills):
-                print(bills[sc].generate_receipt(patient.name))
-            else:
-                print(" Invalid selection.")
-        except ValueError:
-            print("  Invalid input.")
+            sc = int(_inp("Select #: ")) - 1
+            if 0 <= sc < len(bills): print(bills[sc].generate_receipt(p.name))
+        except ValueError: print("  ✘ Invalid.")
 
-    # GENERATOR: Hospital Summary Report
-    
+    # ── REPORTS ───────────────────────────────────────────────────────────────
     def _report_generator(self):
-        """
-        Generator function: yields one section of the report at a time.
-        """
-        yield f"\n{'='*60}"
-        yield  "  SMART HOSPITAL MANAGEMENT SYSTEM — SUMMARY REPORT"
-        yield f"  Generated: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}"
-        yield f"{'='*60}"
-        yield f"\n  PATIENTS    : {len(self._patients)}"
-        yield f"  DOCTORS     : {len(self._doctors)}"
-        yield f"  NURSES      : {len(self._nurses)}"
-        yield f"  APPOINTMENTS: {len(self._appointments)}"
-        yield f"  MED RECORDS : {len(self._records)}"
-        yield f"  LAB REPORTS : {len(self._lab_reports)}"
-        yield f"  MEDICINES   : {len(self._medicines)}"
-        yield f"  BILLS       : {len(self._bills)}"
-
-        booked    = [a for a in self._appointments if a.status == Appointment.STATUS_BOOKED]
-        cancelled = [a for a in self._appointments if a.status == Appointment.STATUS_CANCELLED]
-        yield f"\n  Booked Appointments   : {len(booked)}"
-        yield f"  Cancelled Appointments: {len(cancelled)}"
-
-        total_revenue = sum(b.calculate_total() for b in self._bills if b.is_paid)
-        yield f"\n  Total Revenue (Paid)  : ₹{total_revenue:.2f}"
-
-        expired = [m for m in self._medicines if m.is_expired()]
-        yield f"  Expired Medicines     : {len(expired)}"
-
-        yield "\n  TOP DOCTORS BY FEE:"
-        top_docs = sorted(self._doctors, key=lambda d: d.consultation_fee, reverse=True)[:5]
-        for doc in top_docs:
-            yield f"    Dr. {doc.name:<20} | ₹{doc.consultation_fee:.2f}"
-
-        yield f"\n{'='*60}"
+        yield f"\n{'='*55}\n  HOSPITAL SUMMARY — {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n{'='*55}"
+        yield (f"  Patients:{len(self._patients)} Doctors:{len(self._doctors)} "
+               f"Nurses:{len(self._nurses)} Appts:{len(self._appointments)}")
+        yield (f"  Records:{len(self._records)} Labs:{len(self._lab_reports)} "
+               f"Meds:{len(self._medicines)} Bills:{len(self._bills)}")
+        yield f"  Revenue (paid): ₹{sum(b.calculate_total() for b in self._bills if b.is_paid):.2f}"
+        yield f"  Expired meds  : {sum(1 for m in self._medicines if m.is_expired())}"
+        yield "  Top doctors by fee:"
+        for d in sorted(self._doctors, key=lambda d: d.consultation_fee, reverse=True)[:5]:
+            yield f"    Dr.{d.name} — ₹{d.consultation_fee:.2f}"
+        yield "=" * 55
 
     def generate_report(self):
-        """Print the hospital summary report via generator."""
-        print("\n  Generating Hospital Report...")
-        for line in self._report_generator():
-            print(line)
+        for line in self._report_generator(): print(line)
 
-    # SAVE & LOAD ALL DATA
-    
+    # ── SAVE / LOAD ───────────────────────────────────────────────────────────
     def save_all_data(self):
-        print("\n  Saving All Data")
-        save_data(PATIENTS_FILE,      [p.to_dict() for p in self._patients])
-        save_data(DOCTORS_FILE,       [d.to_dict() for d in self._doctors])
-        save_data(APPOINTMENTS_FILE,  [a.to_dict() for a in self._appointments])
-        save_data(MEDICINES_FILE,     [m.to_dict() for m in self._medicines])
-        save_data(RECORDS_FILE,       [r.to_dict() for r in self._records])
-        save_data(BILLS_FILE,         [b.to_dict() for b in self._bills])
-        save_data(NURSES_FILE,        [n.to_dict() for n in self._nurses])
-        save_data(LAB_REPORTS_FILE,   [l.to_dict() for l in self._lab_reports])
-        print("  All data saved.")
+        save_data(PATIENTS_FILE,     [p.to_dict() for p in self._patients])
+        save_data(DOCTORS_FILE,      [d.to_dict() for d in self._doctors])
+        save_data(APPOINTMENTS_FILE, [a.to_dict() for a in self._appointments])
+        save_data(MEDICINES_FILE,    [m.to_dict() for m in self._medicines])
+        save_data(RECORDS_FILE,      [r.to_dict() for r in self._records])
+        save_data(BILLS_FILE,        [b.to_dict() for b in self._bills])
+        save_data(NURSES_FILE,       [n.to_dict() for n in self._nurses])
+        save_data(LAB_REPORTS_FILE,  [l.to_dict() for l in self._lab_reports])
+        print("  ✔ All data saved.")
 
     def load_all_data(self):
-        print("\n  Loading All Data")
-        # Use clear() + extend() to preserve list object identity (bug fix).
-        self._patients.clear()
-        self._patients.extend(Patient.from_dict(d) for d in load_data(PATIENTS_FILE))
-
-        self._doctors.clear()
-        self._doctors.extend(Doctor.from_dict(d) for d in load_data(DOCTORS_FILE))
-
-        self._appointments.clear()
-        self._appointments.extend(
-            Appointment.from_dict(d) for d in load_data(APPOINTMENTS_FILE))
-
-        self._medicines.clear()
-        self._medicines.extend(Medicine.from_dict(d) for d in load_data(MEDICINES_FILE))
-
-        self._records.clear()
-        self._records.extend(
-            MedicalRecord.from_dict(d) for d in load_data(RECORDS_FILE))
-
-        self._bills.clear()
-        self._bills.extend(Bill.from_dict(d) for d in load_data(BILLS_FILE))
-
-        self._nurses.clear()
-        self._nurses.extend(Nurse.from_dict(d) for d in load_data(NURSES_FILE))
-
-        self._lab_reports.clear()
-        self._lab_reports.extend(
-            LabReport.from_dict(d) for d in load_data(LAB_REPORTS_FILE))
-
-        print(f"  Loaded: {len(self._patients)} patients, "
-              f"{len(self._doctors)} doctors, {len(self._nurses)} nurses, "
-              f"{len(self._appointments)} appointments.")
+        def _load(col, cls, f): col.clear(); col.extend(cls.from_dict(d) for d in load_data(f))
+        _load(self._patients,     Patient,       PATIENTS_FILE)
+        _load(self._doctors,      Doctor,        DOCTORS_FILE)
+        _load(self._appointments, Appointment,   APPOINTMENTS_FILE)
+        _load(self._medicines,    Medicine,      MEDICINES_FILE)
+        _load(self._records,      MedicalRecord, RECORDS_FILE)
+        _load(self._bills,        Bill,          BILLS_FILE)
+        _load(self._nurses,       Nurse,         NURSES_FILE)
+        _load(self._lab_reports,  LabReport,     LAB_REPORTS_FILE)
+        print(f"  ✔ Loaded: {len(self._patients)}P {len(self._doctors)}D "
+              f"{len(self._nurses)}N {len(self._appointments)}A")
