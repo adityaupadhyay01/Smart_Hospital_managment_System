@@ -5,7 +5,7 @@ from menus.menus import (display_main_menu, patient_menu, doctor_menu,
 
 def main():
     h = Hospital("Smart City Hospital")
-    print(f"\n  Welcome — {h._name}")
+    print(f"\n  Welcome to {h._name}")
     h.load_all_data()
     actions = {
         "1": patient_menu, "2": doctor_menu, "3": nurse_menu,
@@ -23,9 +23,9 @@ def main():
             print("  Goodbye!"); break
         try:
             if ch in actions: actions[ch](h)
-            else: print("  ✘ Invalid choice.")
+            else: print("  Invalid choice.")
         except KeyboardInterrupt: print("\n  Back to menu.")
-        except Exception as e: print(f"  ✘ Error: {e}")
+        except Exception as e: print(f"  Error: {e}")
 
 if __name__ == "__main__":
     main()

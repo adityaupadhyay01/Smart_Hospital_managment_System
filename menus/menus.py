@@ -2,7 +2,7 @@ from hospital.hospital import Hospital
 
 def _menu(title, options, hospital):
     while True:
-        print(f"\n  ── {title} ──")
+        print(f"\n {title}")
         for i, (label, _) in enumerate(options, 1): print(f"  {i}. {label}")
         print("  0. Back")
         ch = input("  Choice: ").strip()
@@ -10,19 +10,18 @@ def _menu(title, options, hospital):
         try:
             idx = int(ch) - 1
             if 0 <= idx < len(options): options[idx][1](hospital)
-            else: print("  ✘ Invalid.")
-        except ValueError: print("  ✘ Invalid.")
+            else: print("  Invalid.")
+        except ValueError: print("  Invalid.")
 
 def display_main_menu():
-    print("\n" + "=" * 50)
     print("     SMART HOSPITAL MANAGEMENT SYSTEM")
-    print("=" * 50)
+    print("-" * 50)
     for i, label in enumerate(["Patient Management","Doctor Management",
         "Nurse Management","Appointment Management","Medical Records",
         "Laboratory Reports","Pharmacy Management","Billing Management",
         "Generate Reports","Save Data","Load Data"], 1):
         print(f"  {i:>2}. {label}")
-    print("   0. Exit\n" + "=" * 50)
+    print("   0. Exit\n" + "-" * 50)
 
 def patient_menu(h):
     _menu("Patient Management", [

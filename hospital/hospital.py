@@ -83,22 +83,22 @@ class Hospital:
                        _inp("Phone: "), _inp("Addr : "), _inp("Spec : "),
                        float(_inp("Fee  : ₹")))
             self._doctors.append(d); save_doctor_to_file(d)
-            print(f"  ✔ Doctor added. ID: {d.id}")
+            print(f" Doctor added. ID: {d.id}")
         except ValueError as e: print(f"  ✘ {e}")
 
     @log_action
     def update_doctor(self):
         d = self._find(self._doctors, _inp("Doctor ID: ").upper())
-        if not d: print("  ✘ Not found."); return
+        if not d: print("  Not found."); return
         try:
             n,ph,ad,sp,fs = (_inp(f) or None for f in ["New Name: ","New Phone: ","New Addr: ","New Spec: ","New Fee : "])
             d.update(n, ph, ad, sp, float(fs) if fs else None)
-            save_doctor_to_file(d); print("  ✔ Updated.")
-        except ValueError as e: print(f"  ✘ {e}")
+            save_doctor_to_file(d); print("  Updated.")
+        except ValueError as e: print(f"  {e}")
 
     def manage_doctor_slots(self):
         d = self._find(self._doctors, _inp("Doctor ID: ").upper())
-        if not d: print("  ✘ Not found."); return
+        if not d: print("  Not found."); return
         ch = _inp("1=Add 2=Remove 3=View: ")
         if ch == "1": d.add_slot(_inp("Slot (YYYY-MM-DD HH:MM): "))
         elif ch == "2": d.remove_slot(_inp("Slot to remove: "))
@@ -109,7 +109,7 @@ class Hospital:
         [print(f"  {d} | ₹{d.consultation_fee:.2f}")
          for d in sorted(self._doctors, key=lambda d: d.consultation_fee)]
 
-    # ── NURSES ────────────────────────────────────────────────────────────────
+    # NURSES
     @log_action
     def add_nurse(self):
         try:
@@ -119,28 +119,28 @@ class Hospital:
                       _inp("Phone: "), _inp("Addr : "), _inp("Dept : "),
                       Nurse.SHIFTS[sc] if 0 <= sc < 3 else Nurse.SHIFTS[0])
             self._nurses.append(n); save_nurse_to_file(n)
-            print(f"  ✔ Nurse added. ID: {n.id}")
+            print(f"  Nurse added. ID: {n.id}")
         except (ValueError, IndexError) as e: print(f"  ✘ {e}")
 
     def assign_nurse_department(self):
         n = self._find(self._nurses, _inp("Nurse ID: ").upper())
-        if not n: print("  ✘ Not found."); return
+        if not n: print("  Not found."); return
         n.assign_department(_inp("Dept: ")); save_nurse_to_file(n)
 
     def manage_nurse_shift(self):
         n = self._find(self._nurses, _inp("Nurse ID: ").upper())
-        if not n: print("  ✘ Not found."); return
+        if not n: print("  Not found."); return
         [print(f"  {i+1}. {s}") for i,s in enumerate(Nurse.SHIFTS)]
         try:
             sc = int(_inp("New shift (1-3): ")) - 1
             n.change_shift(Nurse.SHIFTS[sc]); save_nurse_to_file(n)
-        except (ValueError, IndexError): print("  ✘ Invalid.")
+        except (ValueError, IndexError): print("  Invalid.")
 
     def list_all_nurses(self):
         if not self._nurses: print("  No nurses registered."); return
         [print(f"  {n} | {n.department} | {n.shift}") for n in self._nurses]
 
-    # ── APPOINTMENTS ──────────────────────────────────────────────────────────
+    # APPOINTMENTS
     @log_action
     def book_appointment(self):
         try:
@@ -151,23 +151,23 @@ class Hospital:
             if not d.available_slots: print("  No slots."); return
             [print(f"  {i+1}. {s}") for i,s in enumerate(d.available_slots)]
             sc = int(_inp("Slot #: ")) - 1
-            if not (0 <= sc < len(d.available_slots)): print("  ✘ Invalid."); return
+            if not (0 <= sc < len(d.available_slots)): print("  Invalid."); return
             slot = d.available_slots[sc]; d.remove_slot(slot)
             a = Appointment(p.id, d.id, slot, _inp("Reason: ") or "General Checkup")
             self._appointments.append(a); save_appointment_to_file(a)
-            print(f"  ✔ Booked. ID: {a.id}")
-        except (ValueError, IndexError) as e: print(f"  ✘ {e}")
+            print(f"  Booked. ID: {a.id}")
+        except (ValueError, IndexError) as e: print(f"  {e}")
 
     @log_action
     def cancel_appointment(self):
         a = self._find(self._appointments, _inp("Appt ID: ").upper())
-        if not a: print("  ✘ Not found."); return
+        if not a: print("  Not found."); return
         a.cancel(); save_appointment_to_file(a)
 
     @log_action
     def reschedule_appointment(self):
         a = self._find(self._appointments, _inp("Appt ID: ").upper())
-        if not a: print("  ✘ Not found."); return
+        if not a: print("  Not found."); return
         a.reschedule(_inp("New DateTime (YYYY-MM-DD HH:MM): "))
         save_appointment_to_file(a)
 
@@ -180,13 +180,13 @@ class Hospital:
         else: return
         [print(f"  {a}") for a in appts] if appts else print("  None found.")
 
-    # ── MEDICAL RECORDS ───────────────────────────────────────────────────────
+    # MEDICAL RECORDS
     @log_action
     def add_medical_record(self):
         p = self._find(self._patients, _inp("Patient ID: ").upper())
-        if not p: print("  ✘ Not found."); return
+        if not p: print("  Not found."); return
         d = self._find(self._doctors, _inp("Doctor ID : ").upper())
-        if not d: print("  ✘ Not found."); return
+        if not d: print("  Not found."); return
         mr = MedicalRecord(p.id, d.id)
         while (dx := _inp("Diagnosis (blank=stop): ")):
             mr.add_diagnosis(dx); p.add_history(dx)
@@ -195,7 +195,7 @@ class Hospital:
             except ValueError: print("  ✘ Invalid days.")
         if n := _inp("Notes: "): mr.add_notes(n)
         self._records.append(mr); save_record_to_file(mr)
-        print(f"  ✔ Record created. ID: {mr.id}")
+        print(f"  Record created. ID: {mr.id}")
 
     def view_medical_records(self):
         pid = _inp("Patient ID: ").upper()
@@ -206,7 +206,7 @@ class Hospital:
             [print(f"    Dx: {d}") for d in r.diagnoses]
             [print(f"    Rx: {p['medicine']} {p['dosage']} {p['days']}d") for p in r.prescriptions]
 
-    # ── LAB REPORTS ───────────────────────────────────────────────────────────
+    # LAB REPORTS
     @log_action
     def create_lab_report(self):
         p = self._find(self._patients, _inp("Patient ID: ").upper())
@@ -216,14 +216,14 @@ class Hospital:
             try: lr.set_result(_inp("Result : "), _inp("Remarks: "), float(_inp("Cost ₹ : ")))
             except ValueError as e: print(f"  ✘ {e}")
         self._lab_reports.append(lr); save_lab_report_to_file(lr)
-        print(f"  ✔ Lab report created. ID: {lr.id}")
+        print(f"  Lab report created. ID: {lr.id}")
 
     def view_lab_reports(self):
         pid = _inp("Patient ID: ").upper()
         reps = [r for r in self._lab_reports if r.patient_id == pid]
         [print(f"  {r}") for r in reps] if reps else print("  None found.")
 
-    # ── PHARMACY ──────────────────────────────────────────────────────────────
+    # PHARMACY 
     @log_action
     def add_medicine(self):
         try:
@@ -231,12 +231,12 @@ class Hospital:
                          float(_inp("Price ₹ : ")), int(_inp("Stock   : ")),
                          _inp("Expiry (YYYY-MM-DD): "), _inp("Mfr     : ") or "Unknown")
             self._medicines.append(m); save_medicine_to_file(m)
-            print(f"  ✔ Medicine added. ID: {m.id}")
+            print(f"  Medicine added. ID: {m.id}")
         except ValueError as e: print(f"  ✘ {e}")
 
     def update_medicine_stock(self):
         m = self._find(self._medicines, _inp("Medicine ID: ").upper())
-        if not m: print("  ✘ Not found."); return
+        if not m: print("  Not found."); return
         try: m.update_stock(int(_inp("Qty (+add/-remove): "))); save_medicine_to_file(m)
         except ValueError as e: print(f"  ✘ {e}")
 
@@ -257,11 +257,11 @@ class Hospital:
         if not self._medicines: print("  No medicines."); return
         [print(f"  {m}") for m in self._medicines]
 
-    # ── BILLING ───────────────────────────────────────────────────────────────
+    # BILLING 
     @log_action
     def create_bill(self):
         p = self._find(self._patients, _inp("Patient ID: ").upper())
-        if not p: print("  ✘ Not found."); return
+        if not p: print("  Not found."); return
         bill = Bill(p.id)
         if _inp("Add consultation? y/n: ").lower() == "y":
             try:
@@ -346,5 +346,5 @@ class Hospital:
         _load(self._bills,        Bill,          BILLS_FILE)
         _load(self._nurses,       Nurse,         NURSES_FILE)
         _load(self._lab_reports,  LabReport,     LAB_REPORTS_FILE)
-        print(f"  ✔ Loaded: {len(self._patients)}P {len(self._doctors)}D "
+        print(f"  Loaded: {len(self._patients)}P {len(self._doctors)}D "
               f"{len(self._nurses)}N {len(self._appointments)}A")
